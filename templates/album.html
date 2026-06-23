@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}
+{{ album["game"] }}
+{% endblock %}
+
+{% block head %}
+<script>
+    const audioStream = new Audio("");
+    audioStream.addEventListener('ended', function () {
+            audioStream.pause();
+            audioStream.src = "";
+            audioStream.load();
+        });
+    function play_audio(stream){
+        audioStream.pause();
+        audioStream.src = stream;
+        audioStream.load();
+        audioStream.play();
+  }
+</script>
+{% endblock %}
+
+{% block body %}
+    <img src="{{ album["img_src"] }}" alt="{{ album["game"] }}">
+    <h1>{{ album["game"] }}</h1>
+    <hr>
+    <h1>Songs</h1>
+    <hr>
+    <ul>
+        {% for song in songs %}
+            <li>
+                <button type="button" onclick="play_audio('{{ song["stream_src"] }}')" class="btn btn-primary">{{ song["name"] }}</button>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

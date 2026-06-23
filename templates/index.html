@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block head %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            new Splide('.splide', {
+                fixedWidth: '18rem',
+                perMove: 2,
+                gap: '0.5rem',
+                pagination: false
+            }).mount()
+        });
+    </script>
+
+{% endblock %}
+
+{% block body %}
+    <h1>For you</h1>
+    <section class="splide" aria-label="For You">
+      <div class="splide__track">
+        <ul class="splide__list">
+            {% for album in albums %}
+            <li class="splide__slide">
+                {{ macros.album_card(album["game"], album["img_src"], album["release_year"], album["id"]) }}
+            </li>
+            {% endfor %}
+        </ul>
+      </div>
+    </section>
+    <hr>
+    <h1>Your playlists</h1>
+    <h2>TODO</h2>
+    <hr>
+    <h1>Top 10 songs</h1>
+    <h2>TODO</h2>
+    <hr>
+    <h1>Browse by category</h1>
+    <h2>TODO</h2>
+    <hr>
+    <h1>Browse by game</h1>
+    <h2>TODO</h2>
+    <hr>
+    <h1>Browse by publisher</h1>
+    <h2>TODO</h2>
+    <hr>
+    <h1>Browse by console</h1>
+    <h2>TODO</h2>
+{% endblock %}

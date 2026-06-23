@@ -1,0 +1,80 @@
+body {
+    font-family: Inter, Helvetica, Arial, sans-serif;
+}
+
+h1 {
+    font-weight: bold;
+}
+
+#title-nav {
+    font-weight: bold;
+}
+
+/* Tight blur wrapper done by Gemini with edits */
+
+/* 1. Shrink wrapper to fit the image contents exactly */
+.tight-blur-wrapper {
+    position: relative;
+    display: inline-block; /* Crucial: Shrinks width to fit the image */
+    max-width: 100%;
+    max-height: 300px; /* Sets the absolute boundary limit */
+    overflow: hidden; /* Clips the background blur bleed */
+    border-top-left-radius: var(--bs-card-inner-border-radius);
+    border-top-right-radius: var(--bs-card-inner-border-radius);
+}
+
+/* 2. The foreground image sets the true layout size */
+.tight-blur-wrapper img {
+    position: relative;
+    z-index: 2;
+    display: block; /* Removes bottom whitespace padding bugs */
+    max-width: 100%;
+    max-height: 300px; /* Must match the parent wrapper limit */
+    width: auto;
+    height: auto;
+    object-fit: contain; /* Scales and reveals the full image */
+}
+
+/* 3. The blurred background mirrors the image bounds */
+.tight-blur-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+
+    background-image: var(--bg-image);
+    background-position: center;
+    background-size: cover; /* Spreads out color to fill any letterbox gaps */
+
+    filter: blur(10px);
+    transform: scale(1.15); /* Eliminates fading edge transparency bugs */
+}
+
+/* Hide scrollbar by Gemini */
+
+/* Apply to a specific container, or use 'body' for the whole page */
+html, body {
+  /* Modern Standard (Firefox) */
+  scrollbar-width: none;
+
+  /* Legacy Edge and Internet Explorer */
+  -ms-overflow-style: none;
+}
+
+/* Chrome, Safari, and Opera */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar{
+  display: none;
+}
+
+
+html {
+    scroll-padding-top: .5rem;
+}
+
+.sticky-top {
+    top: .5rem
+}
