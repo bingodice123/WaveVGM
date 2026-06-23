@@ -5,12 +5,25 @@
 {% endblock %}
 {% block head %}
 <script>
-    function play_audio(stream) {
+    // Play audio 50% Gemini
+    function play_audio(stream, img_src='https://i.imgur.com/x6GQBYz.jpeg', title='Unknown', game='Unknown') {
+        // Gemini
         // 1. Select the media slot element nested inside media-chrome
             const media_controller = document.querySelector('#media-controls');
             if (media_controller.style.display === 'none') {
                 media_controller.style.display = 'flex';
             }
+            // Me
+            const blurred_thumbnail_img = document.getElementById('blurred-thumbnail-img');
+            const main_thumbnail_img = document.getElementById('main-thumbnail-img');
+            blurred_thumbnail_img.style.setProperty('--bg-image', `url(${img_src})`);
+            main_thumbnail_img.src = img_src;
+            const media_title = document.getElementById('media-title');
+            const media_desc = document.getElementById('media-desc');
+            media_title.innerHTML = title;
+            media_desc.innerHTML = `Song &bull; ${game}`;
+
+            // Gemini
             const audioElement = document.querySelector('media-controller [slot="media"]');
 
             // 2. Assign the new URL path
@@ -38,7 +51,7 @@
     <ul>
         {% for song in songs %}
             <li>
-                <button type="button" onclick="play_audio('{{ song["stream_src"] }}')" class="btn btn-primary">{{ song["name"] }}</button>
+                <button type="button" onclick="play_audio('{{ song["stream_src"] }}', '{{ album["img_src"] }}', '{{ song["name"] }}', '{{ album["game"] }}')" class="btn btn-primary">{{ song["name"] }}</button>
             </li>
         {% endfor %}
     </ul>
