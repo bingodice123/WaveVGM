@@ -83,3 +83,18 @@ body::-webkit-scrollbar,
   padding-bottom: 4.5rem;   /* space for media bar */
   box-sizing: border-box;
 }
+
+media-controller
+{
+    --media-primary-color: black;
+    --media-secondary-color: transparent;
+    --media-control-hover-background: rgb(255 255 255 / 0.25);
+    --media-background-color: transparent;
+    --bs-body-color: transparent;
+}
+
+media-time-range
+{
+    --media-time-range-buffered-color: transparent;
+    --media-range-track-background: rgb(100 100 100 / 0.75)
+}

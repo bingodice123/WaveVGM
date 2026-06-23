@@ -3,21 +3,29 @@
 {% block title %}
 {{ album["game"] }}
 {% endblock %}
-
 {% block head %}
 <script>
-    const audioStream = new Audio("");
-    audioStream.addEventListener('ended', function () {
-            audioStream.pause();
-            audioStream.src = "";
-            audioStream.load();
-        });
-    function play_audio(stream){
-        audioStream.pause();
-        audioStream.src = stream;
-        audioStream.load();
-        audioStream.play();
-  }
+    function play_audio(stream) {
+        // 1. Select the media slot element nested inside media-chrome
+            const media_controller = document.querySelector('#media-controls');
+            if (media_controller.style.display === 'none') {
+                media_controller.style.display = 'flex';
+            }
+            const audioElement = document.querySelector('media-controller [slot="media"]');
+
+            // 2. Assign the new URL path
+            audioElement.src = stream;
+
+            // 3. Force the browser to reset and load the new asset
+            audioElement.load();
+
+            // 4. (Optional) Initiate playback programmatically
+            audioElement.play().catch(error => {
+              console.log("Playback blocked until user interaction occurs.");
+            });
+
+
+    }
 </script>
 {% endblock %}
 
