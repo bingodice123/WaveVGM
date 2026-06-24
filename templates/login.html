@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block body %}
+    <form action="/login" method="post">
+        <div class="mb-3">
+            <label for="usernameInput" class="form-label">Username</label>
+            <input type="text" class="form-control" id="usernameInput" name="username">
+        </div>
+        <div class="mb-3">
+            <label for="passwordInput" class="form-label">Password</label>
+            <input type="password" class="form-control" id="passwordInput" name="password">
+            <script>
+			$(function() {
+				$("input[type=password]").maskPassword(500)
+			});
+		</script>
+        </div>
+        {% if error %}
+        <div class="mb-3">
+            <p style="color: red">{{ error }}</p>
+        </div>
+        {% endif %}
+        <div class="mb-3">
+            <input type="submit" class="btn btn-primary" value="Login">
+        </div>
+    </form>
+{% endblock %}

@@ -1,2 +1,8 @@
 Flask
 Flask-Session
+
+flask-session2
+werkzeug
+booktype
+flask-login
+python-dotenv

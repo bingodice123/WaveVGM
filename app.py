@@ -1,11 +1,37 @@
-from flask import Flask, render_template, request, abort
+from flask import Flask, session, render_template, request, abort, redirect
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 import traceback
+import os
+from dotenv import load_dotenv
+
+load_dotenv("keys.env")
 
 app = Flask(__name__)
 DB_EXECUTOR = ThreadPoolExecutor(max_workers=1)
 VALID_ANALYTICS = ["views", "likes", "exits", "retention_percent"]
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+
+
+class User(UserMixin):
+    def __init__(self, row):
+        self.id = str(row["id"])
+        self.username = row["username"]
+        self.password_hash = row["password_hash"]
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    rows = query_safe("SELECT * FROM users WHERE id = ?", (user_id,))
+    if not rows:
+        return None
+    return User(rows[0])
 
 def sqlite_worker(query: str, values: tuple = tuple()):
     conn = sqlite3.connect('wavevgm.db')
@@ -82,6 +108,48 @@ def update_analytics():
         traceback.print_exc()
         return {"success": False}, 500
     return {"success": True}, 200
+
+@app.route("/login", methods=["GET", "POST"])
+def login(error = ""):
+
+    if request.method == "POST" and not error:
+
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        if not username or not password:
+            return login("Missing username or password"), 400
+
+        rows = query_safe("SELECT * FROM users WHERE username = ?", (username,))
+        if not rows:
+            return login("Invalid credentials"), 401
+
+        user = User(rows[0])
+
+        if not check_password_hash(user.password_hash, password):
+            return login("Invalid credentials"), 401
+
+        login_user(user)
+        return redirect("/"), 200
+    else:
+        return render_template("login.html", error=error)
+
+
+@app.route("/logout", methods=["POST"])
+@login_required
+def logout():
+    logout_user()
+    return {"success": True}, 200
+
+
+@app.route("/me")
+@login_required
+def me():
+    return {
+        "id": current_user.id,
+        "username": current_user.username
+    }, 200
+
 
 if __name__ == '__main__':
     app.run()
