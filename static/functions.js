@@ -1,4 +1,4 @@
-let playing_audio_id = null;
+let playingAudioId = null;
 
 function getUniqueListenedStats(audio) {
     const ranges = audio.played; // Native browser TimeRanges object
@@ -18,7 +18,7 @@ function getUniqueListenedStats(audio) {
     };
 }
 
-async function send_analytics(type, id, amount) {
+async function sendAnalytics(type, id, amount) {
     const payload = {type, id, amount};
     console.log(payload)
     try {
@@ -42,8 +42,8 @@ async function send_analytics(type, id, amount) {
 
 window.addEventListener('pagehide', () => {
 
-    if (playing_audio_id) {
-        const payload = {type: 'exits', amount: 1, id: playing_audio_id}
+    if (playingAudioId) {
+        const payload = {type: 'exits', amount: 1, id: playingAudioId}
         fetch('/api/send-analytics', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -55,9 +55,9 @@ window.addEventListener('pagehide', () => {
 
 window.addEventListener('pagehide', () => {
 
-    if (playing_audio_id) {
+    if (playingAudioId) {
         const audio = document.querySelector('#vgm-audio')
-        const payload = {type: 'retention_percent', amount: getUniqueListenedStats(audio)["percent"], id: playing_audio_id}
+        const payload = {type: 'retention_percent', amount: getUniqueListenedStats(audio)["percent"], id: playingAudioId}
         fetch('/api/send-analytics', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -69,22 +69,22 @@ window.addEventListener('pagehide', () => {
 
 
 // Play audio 50% Gemini
-function play_audio(stream, img_src = 'https://i.imgur.com/x6GQBYz.jpeg', title = 'Unknown', game = 'Unknown', song_id) {
+function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 'Unknown', game = 'Unknown', songId) {
     // Gemini
     // 1. Select the media slot element nested inside media-chrome
-    const media_controller = document.querySelector('#media-controls');
-    if (media_controller.style.display === 'none') {
-        media_controller.style.display = 'flex';
+    const mediaController = document.querySelector('#media-controls');
+    if (mediaController.style.display === 'none') {
+        mediaController.style.display = 'flex';
     }
     // Me
-    const blurred_thumbnail_img = document.getElementById('blurred-thumbnail-img');
-    const main_thumbnail_img = document.getElementById('main-thumbnail-img');
-    blurred_thumbnail_img.style.setProperty('--bg-image', `url(${img_src})`);
-    main_thumbnail_img.src = img_src;
-    const media_title = document.getElementById('media-title');
-    const media_desc = document.getElementById('media-desc');
-    media_title.innerHTML = title;
-    media_desc.innerHTML = `Song &bull; ${game}`;
+    const blurredThumbnailImg = document.getElementById('blurred-thumbnail-img');
+    const mainThumbnailImg = document.getElementById('main-thumbnail-img');
+    blurredThumbnailImg.style.setProperty('--bg-image', `url(${imgSrc})`);
+    mainThumbnailImg.src = imgSrc;
+    const mediaTitle = document.getElementById('media-title');
+    const mediaDesc = document.getElementById('media-desc');
+    mediaTitle.innerHTML = title;
+    mediaDesc.innerHTML = `Song &bull; ${game}`;
 
     // Gemini
     const audioElement = document.querySelector('media-controller [slot="media"]');
@@ -95,8 +95,8 @@ function play_audio(stream, img_src = 'https://i.imgur.com/x6GQBYz.jpeg', title 
     // 3. Force the browser to reset and load the new asset
     audioElement.load();
 
-    send_analytics("views", song_id, 1);
-    playing_audio_id = song_id;
+    sendAnalytics("views", songId, 1);
+    playingAudioId = songId;
 
     // 4. (Optional) Initiate playback programmatically
     audioElement.play().catch(error => {
