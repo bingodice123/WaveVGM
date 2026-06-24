@@ -1,0 +1,107 @@
+let playing_audio_id = null;
+
+function getUniqueListenedStats(audio) {
+    const ranges = audio.played; // Native browser TimeRanges object
+    let totalSecondsListened = 0;
+
+    // Loop through each distinct fragment the user actually played
+    for (let i = 0; i < ranges.length; i++) {
+        totalSecondsListened += ranges.end(i) - ranges.start(i);
+    }
+
+    const totalDuration = audio.duration || 0;
+    const percentListened = totalDuration > 0 ? (totalSecondsListened / totalDuration) : 0;
+
+    return {
+        seconds: totalSecondsListened,
+        percent: percentListened
+    };
+}
+
+async function send_analytics(type, id, amount) {
+    const payload = {type, id, amount};
+    console.log(payload)
+    try {
+        const response = await fetch('/api/send-analytics', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (!result.success) {
+            console.error("Error sending analytics. Error: The server sent back an invalid response.")
+        }
+
+    } catch (error) {
+        console.error("Error sending analytics. Error: ", error)
+    }
+}
+
+
+window.addEventListener('pagehide', () => {
+
+    if (playing_audio_id) {
+        const payload = {type: 'exits', amount: 1, id: playing_audio_id}
+        fetch('/api/send-analytics', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload),
+            keepalive: true // Crucial property
+        });
+    }
+});
+
+window.addEventListener('pagehide', () => {
+
+    if (playing_audio_id) {
+        const audio = document.querySelector('#vgm-audio')
+        const payload = {type: 'retention_percent', amount: getUniqueListenedStats(audio)["percent"], id: playing_audio_id}
+        fetch('/api/send-analytics', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload),
+            keepalive: true // Crucial property
+        });
+    }
+});
+
+
+// Play audio 50% Gemini
+function play_audio(stream, img_src = 'https://i.imgur.com/x6GQBYz.jpeg', title = 'Unknown', game = 'Unknown', song_id) {
+    // Gemini
+    // 1. Select the media slot element nested inside media-chrome
+    const media_controller = document.querySelector('#media-controls');
+    if (media_controller.style.display === 'none') {
+        media_controller.style.display = 'flex';
+    }
+    // Me
+    const blurred_thumbnail_img = document.getElementById('blurred-thumbnail-img');
+    const main_thumbnail_img = document.getElementById('main-thumbnail-img');
+    blurred_thumbnail_img.style.setProperty('--bg-image', `url(${img_src})`);
+    main_thumbnail_img.src = img_src;
+    const media_title = document.getElementById('media-title');
+    const media_desc = document.getElementById('media-desc');
+    media_title.innerHTML = title;
+    media_desc.innerHTML = `Song &bull; ${game}`;
+
+    // Gemini
+    const audioElement = document.querySelector('media-controller [slot="media"]');
+
+    // 2. Assign the new URL path
+    audioElement.src = stream;
+
+    // 3. Force the browser to reset and load the new asset
+    audioElement.load();
+
+    send_analytics("views", song_id, 1);
+    playing_audio_id = song_id;
+
+    // 4. (Optional) Initiate playback programmatically
+    audioElement.play().catch(error => {
+        console.log("Playback blocked until user interaction occurs.");
+    });
+
+
+}

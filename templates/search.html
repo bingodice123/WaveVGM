@@ -40,7 +40,7 @@
         <ul class="splide__list">
             {% for song in songs %}
             <li class="splide__slide">
-                {{ macros.song_card(song["name"], song["game"], song["img_src"], song["stream_src"]) }}
+                {{ macros.song_card(song["name"], song["game"], song["img_src"], song["stream_src"], song["id"]) }}
             </li>
             {% endfor %}
         </ul>

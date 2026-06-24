@@ -16,42 +16,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
     <link rel="stylesheet" href="/static/styles.css">
     <meta name="referrer" content="no-referrer">
-    <script>
-        // Play audio 50% Gemini
-        function play_audio(stream, img_src='https://i.imgur.com/x6GQBYz.jpeg', title='Unknown', game='Unknown') {
-            // Gemini
-            // 1. Select the media slot element nested inside media-chrome
-                const media_controller = document.querySelector('#media-controls');
-                if (media_controller.style.display === 'none') {
-                    media_controller.style.display = 'flex';
-                }
-                // Me
-                const blurred_thumbnail_img = document.getElementById('blurred-thumbnail-img');
-                const main_thumbnail_img = document.getElementById('main-thumbnail-img');
-                blurred_thumbnail_img.style.setProperty('--bg-image', `url(${img_src})`);
-                main_thumbnail_img.src = img_src;
-                const media_title = document.getElementById('media-title');
-                const media_desc = document.getElementById('media-desc');
-                media_title.innerHTML = title;
-                media_desc.innerHTML = `Song &bull; ${game}`;
-
-                // Gemini
-                const audioElement = document.querySelector('media-controller [slot="media"]');
-
-                // 2. Assign the new URL path
-                audioElement.src = stream;
-
-                // 3. Force the browser to reset and load the new asset
-                audioElement.load();
-
-                // 4. (Optional) Initiate playback programmatically
-                audioElement.play().catch(error => {
-                  console.log("Playback blocked until user interaction occurs.");
-                });
-
-
-        }
-    </script>
+    <script src="/static/functions.js"></script>
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -97,6 +62,7 @@
   <audio
     slot="media"
     src=""
+    id="vgm-audio"
   ></audio>
   <media-control-bar>
     <media-play-button></media-play-button>
