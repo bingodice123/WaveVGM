@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+{% import "macros.html" as macros %}
+
+
+{% block title %}
+    Search
+{% endblock %}
+
+
+
+{% block head %}
+    <script>
+        document.addEventListener("turbo:load", function () {
+            new Splide('#songs-carousel', {
+                fixedWidth: '18rem',
+                perMove: 2,
+                gap: '0.5rem',
+                pagination: false
+            }).mount()
+        });
+        document.addEventListener("turbo:load", function () {
+            new Splide('#albums-carousel', {
+                fixedWidth: '18rem',
+                perMove: 2,
+                gap: '0.5rem',
+                pagination: false
+            }).mount()
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+    <h1>Results</h1>
+    <hr>
+    {% if songs %}
+    <h2>Songs</h2>
+    {% endif %}
+    <section class="splide" aria-label="Songs" id="songs-carousel">
+      <div class="splide__track">
+        <ul class="splide__list">
+            {% for song in songs %}
+            <li class="splide__slide">
+                {{ macros.song_card(song["name"], song["game"], song["img_src"], song["stream_src"]) }}
+            </li>
+            {% endfor %}
+        </ul>
+      </div>
+    </section>
+    {% if songs and albums %}
+    <hr>
+    {% endif %}
+    {% if albums %}
+    <h2>Albums</h2>
+    {% endif %}
+    <section class="splide" aria-label="Albums" id="albums-carousel">
+      <div class="splide__track">
+        <ul class="splide__list">
+            {% for album in albums %}
+            <li class="splide__slide">
+                {{ macros.album_card(album["game"], album["img_src"], album["release_year"], album["id"]) }}
+            </li>
+            {% endfor %}
+        </ul>
+      </div>
+    </section>
+    {% if not albums and not songs %}
+    <h2>No results</h2>
+    {% endif %}
+{% endblock %}

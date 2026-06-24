@@ -12,3 +12,18 @@
     </a>
 
 {% endmacro %}
+
+{% macro song_card(name, game, img_src, stream) %}
+    <a href="#" onclick="play_audio('{{ stream }}', '{{ img_src }}', '{{ name }}', '{{ game }}'); return false;" style="text-decoration: none">
+        <div class="card flex-shrink-0" style="width: 18rem; height: 18rem">
+            <div class="d-flex tight-blur-wrapper" style="height: 14rem; --bg-image: url('{{ img_src }}')">
+                <img src="{{ img_src }}" class="card-img-top" alt="" role="presentation" style="height: 100%; width: 100%; object-fit: contain">
+            </div>
+            <div class="card-body" style="height: 6rem">
+                <h5 class="card-title">{{ name }}</h5>
+                <p class="card-text">Song &bull; {{ game }}</p>
+            </div>
+        </div>
+    </a>
+
+{% endmacro %}

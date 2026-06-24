@@ -6,7 +6,6 @@ app = Flask(__name__)
 DB_EXECUTOR = ThreadPoolExecutor(max_workers=1)
 
 
-
 def sqlite_worker(query: str, values: tuple = tuple()):
     conn = sqlite3.connect('wavevgm.db')
     try:
@@ -42,6 +41,16 @@ def album_page():
         abort(404)
     songs = query_safe("SELECT * FROM songs WHERE album_id = ?", (album_id,))
     return render_template('album.html', album=album_info, songs=songs)
+
+
+@app.route('/search')
+def search_page():
+    q = request.args.get('q')
+    if not q:
+        abort(400)
+    songs = query_safe("SELECT name, game, img_src, stream_src FROM songs JOIN albums ON songs.album_id = albums.id WHERE name LIKE '%' || ? || '%'", (q,))
+    albums = query_safe("SELECT * FROM albums WHERE game LIKE '%' || ? || '%'", (q,))
+    return render_template('search.html', songs=songs, albums=albums, q=q)
 
 
 if __name__ == '__main__':
