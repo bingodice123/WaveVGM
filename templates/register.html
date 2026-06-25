@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Register
+{% endblock %}
+
+{% block body %}
+     <form action="/register" method="post">
+        <div class="mb-3">
+            <label for="usernameInput" class="form-label">Username</label>
+            <input type="text" class="form-control" id="usernameInput" name="username">
+        </div>
+        <div class="mb-3">
+            <label for="passwordInput" class="form-label">Password</label>
+            <input type="password" id="passwordInput" name="password" class="form-control" aria-describedby="passwordHelpBlock">
+            <div id="passwordHelpBlock" class="form-text">
+              Your password must be at least 8 characters long, contain letters and numbers, and must not contain spaces or emoji.
+            </div>
+            <script>
+			$(function() {
+				$("input[type=password]").maskPassword(500)
+			});
+		</script>
+        </div>
+        {% if error %}
+        <div class="mb-3">
+            <p style="color: red">{{ error }}</p>
+        </div>
+        {% endif %}
+        <div class="mb-3">
+            <input type="submit" class="btn btn-primary" value="Login">
+        </div>
+    </form>
+{% endblock %}

@@ -112,7 +112,14 @@ function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 
 
     sendAnalytics("views", songId, 1)
     playingAudioId = songId;
-
+    const payload = {id: playingAudioId};
+    fetch('/api/update-playing-song', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    }).catch(error => {
+        console.error("Error", error);
+    });
     // 4. (Optional) Initiate playback programmatically
     audioElement.play().catch(error => {
         console.log("Playback blocked until user interaction occurs.");

@@ -1,5 +1,5 @@
 {% macro album_card(game, img_src, year, id) %}
-    <a href="/album?id={{ id }}" style="text-decoration: none">
+    <a href="/album?id={{ id }}" class="text-decoration-none">
         <div class="card flex-shrink-0" style="width: 18rem; height: 18rem">
             <div class="d-flex tight-blur-wrapper" style="height: 14rem; --bg-image: url('{{ img_src }}')">
                 <img src="{{ img_src }}" class="card-img-top" alt="" role="presentation" style="height: 100%; width: 100%; object-fit: contain">
@@ -14,7 +14,7 @@
 {% endmacro %}
 
 {% macro song_card(name, game, img_src, stream, id) %}
-    <a href="#" onclick="playAudio('{{ stream }}', '{{ img_src }}', '{{ name }}', '{{ game }}', '{{ id }}'); return false;" style="text-decoration: none">
+    <a href="#" onclick="playAudio('{{ stream }}', '{{ img_src }}', '{{ name }}', '{{ game }}', '{{ id }}'); return false;" class="text-decoration-none">
         <div class="card flex-shrink-0" style="width: 18rem; height: 18rem">
             <div class="d-flex tight-blur-wrapper" style="height: 14rem; --bg-image: url('{{ img_src }}')">
                 <img src="{{ img_src }}" class="card-img-top" alt="" role="presentation" style="height: 100%; width: 100%; object-fit: contain">

@@ -41,9 +41,13 @@
 
             </form>
         </div>
-        <div class="col-4 d-flex justify-content-end align-items-center">
+        <div class="col-4 d-flex pe-2 gap-3 justify-content-end align-items-center">
             {% if not current_user.is_authenticated %}
-            <a href="/login" style="text-decoration: none; color: black">Log in</a>
+            <a href="/login" class="text-decoration-none text-dark">Log in</a>
+            <a href="/register" class="text-decoration-none text-dark">Register</a>
+            {% else %}
+                <span>Hello, {{ current_user.username }}</span>
+            <a href="/logout" class="text-decoration-none text-dark">Log out</a>
             {% endif %}
         </div>
     </div>
@@ -78,7 +82,13 @@
   </media-control-bar>
 </media-controller>
     </div>
-    <div class="col-4"></div>
+    <div class="col-4 d-flex justify-content-end pe-2">
+        {% if current_user.is_authenticated %}
+        <button type="button" class="btn btn-link text-decoration-none text-dark h-100 w-auto" onclick="sendAnalytics('likes','{{ current_user.get_id() }}', 1); document.getElementById('like-button').classList.toggle('bi-hand-thumbs-up'); document.getElementById('like-button').classList.toggle('bi-hand-thumbs-up-fill'); return false;">
+                <i class="bi {{ 'bi-hand-thumbs-up-fill' if has_liked() else 'bi-hand-thumbs-up' }} h-100 w-auto fs-1" id="like-button"></i>
+        </button>
+        {% endif %}
+    </div>
 
 </div>
 

@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Logout
+{% endblock %}
+
+{% block body %}
+    <h1>Are you sure you want to log out?</h1>
+    <form action="/logout" method="post">
+        <input type="submit" value="Logout" class="btn btn-primary">
+    </form>
+{% endblock %}
