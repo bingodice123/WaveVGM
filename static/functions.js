@@ -1,4 +1,5 @@
 let playingAudioId = null;
+const liked_classes = {true: 'bi-hand-thumbs-up-fill', false: 'bi-hand-thumbs-up'}
 
 function getUniqueListenedStats(audio) {
     const ranges = audio.played; // Native browser TimeRanges object
@@ -118,6 +119,7 @@ function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 
     sendAnalytics("views", songId, 1)
     playingAudioId = songId;
     const payload = {id: playingAudioId};
+    const liked_payload = {id: playingAudioId};
     fetch('/api/update-playing-song', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -125,6 +127,18 @@ function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 
     }).catch(error => {
         console.error("Error", error);
     });
+    fetch('api/has-liked', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(liked_payload)
+    }).then((response) => {
+    return response.json(); // Returns a new promise
+  })
+  .then((data) => {
+    document.getElementById("like-button").classList.remove("bi-hand-thumbs-up");
+    document.getElementById("like-button").classList.remove("bi-hand-thumbs-up-fill");
+    document.getElementById("like-button").classList.add(liked_classes[data["liked"]])
+  })
     // 4. (Optional) Initiate playback programmatically
     audioElement.play().catch(error => {
         console.log("Playback blocked until user interaction occurs.");

@@ -130,6 +130,16 @@ def update_playing_song():
     session["id"] = playing_song
     return {"Success": True}
 
+@app.route('/api/has-liked', methods=["POST"])
+def has_liked():
+    body = request.get_json()
+    try:
+        return {"liked": bool(query_safe("SELECT * FROM user_likes WHERE user_id = ? AND song_id = ?",
+                               (current_user.get_id(), body.get("id") or -1)))}
+    except sqlite3.OperationalError:
+        abort(500)
+
+
 @app.route('/api/send-analytics', methods=["POST"])
 def update_analytics():
     body = request.get_json()
