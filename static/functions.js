@@ -104,13 +104,13 @@ function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 
     mainThumbnailImg.src = imgSrc;
     const mediaTitle = document.getElementById('media-title');
     const mediaDesc = document.getElementById('media-desc');
-    mediaTitle.innerHTML = title.replaceAll("＇", "'").replaceAll("：", ":");
-    mediaDesc.innerHTML = `Song &bull; ${game.replaceAll("＇", "'").replaceAll("：", ":")}`;
+    mediaTitle.innerHTML = title.replaceAll("＇", "'").replaceAll("：", ":").replaceAll("＃", "#");
+    mediaDesc.innerHTML = `Song &bull; ${game.replaceAll("＇", "'").replaceAll("：", ":").replaceAll("＃", "#")}`;
     // Gemini
     const audioElement = document.querySelector('media-controller [slot="media"]');
 
     // 2. Assign the new URL path
-    audioElement.src = String.raw`${stream.replaceAll("＇", "'")}`;
+    audioElement.src = String.raw`${stream.replaceAll("＇", "'").replaceAll("＃", "%23")}`;
 
     // 3. Force the browser to reset and load the new asset
     audioElement.load();

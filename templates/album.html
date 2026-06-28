@@ -13,7 +13,7 @@
     <ul>
         {% for song in songs %}
             <li>
-                <button type="button" onclick="playAudio('{{ song["stream_src"] | replace("'", "＇")}}', '{{ album["img_src"] }}', '{{ song["name"] | replace("'", "＇") | replace("：", ":")}}', '{{ album["game"] | replace("'", "＇") | replace("：", ":")}}', '{{ song["id"] }}')" class="btn btn-primary">{{ song["name"] }}</button>
+                <button type="button" onclick="playAudio('{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃")}}', '{{ album["img_src"] }}', '{{ song["name"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃")}}', '{{ album["game"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃")}}', '{{ song["id"] }}')" class="btn btn-primary">{{ song["name"] }}</button>
             </li>
         {% endfor %}
     </ul>
