@@ -136,8 +136,6 @@ def update_analytics():
     analytic_type = body.get("type")
     analytic_id = body.get("id")
     analytic_amount = body.get("amount")
-    print(analytic_id)
-    print(current_user.get_id())
     if not (analytic_type and analytic_amount and analytic_id):
         return {"success": False}, 400
     try:
