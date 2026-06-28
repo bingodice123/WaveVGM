@@ -5,8 +5,8 @@
                 <img src="{{ img_src }}" class="card-img-top" alt="" role="presentation" style="height: 100%; width: 100%; object-fit: contain">
             </div>
             <div class="card-body" style="height: 6rem">
-                <h5 class="card-title">{{ game }}</h5>
-                <p class="card-text">Album &bull; {{ year }}</p>
+                <div class="card-title d-flex align-items-center" style="height: calc(3rem - 16px);"><h5 class="fit">{{ game | replace("：", ":")}}</h5></div>
+                <div class="card-text d-flex align-items-center" style="height: calc(3rem - 16px);"><p class="fit">Album &bull; {{ year }}</p></div>
             </div>
         </div>
     </a>
@@ -14,14 +14,14 @@
 {% endmacro %}
 
 {% macro song_card(name, game, img_src, stream, id) %}
-    <a href="#" onclick="playAudio('{{ stream }}', '{{ img_src }}', '{{ name }}', '{{ game }}', '{{ id }}'); return false;" class="text-decoration-none">
+    <a href="#" onclick="playAudio('{{ stream | replace("'", "＇")}}', '{{ img_src }}', '{{ name | replace("'", "＇") }}', '{{ game | replace("'", "＇") }}', '{{ id }}'); return false;" class="text-decoration-none">
         <div class="card flex-shrink-0" style="width: 18rem; height: 18rem">
             <div class="d-flex tight-blur-wrapper" style="height: 14rem; --bg-image: url('{{ img_src }}')">
                 <img src="{{ img_src }}" class="card-img-top" alt="" role="presentation" style="height: 100%; width: 100%; object-fit: contain">
             </div>
             <div class="card-body" style="height: 6rem">
-                <h5 class="card-title">{{ name }}</h5>
-                <p class="card-text">Song &bull; {{ game }}</p>
+                <div class="card-title d-flex align-items-center" style="height: calc(3rem - 16px);"><h5 class="fit">{{ name | replace("：", ":")}}</h5></div>
+                <div class="card-text d-flex align-items-center" style="height: calc(3rem - 16px);"><p class="fit">Song &bull; {{ game | replace("：", ":")}}</p></div>
             </div>
         </div>
     </a>

@@ -69,7 +69,7 @@ def query_safe(query: str, values: tuple = tuple()):
 
 @app.route('/')
 def index():
-    albums = query_safe("SELECT * FROM albums")
+    albums = query_safe("SELECT * FROM albums LIMIT 10")
     return render_template('index.html', albums=albums)
 
 @app.route('/album')
@@ -84,15 +84,44 @@ def album_page():
     songs = query_safe("SELECT * FROM songs WHERE album_id = ?", (album_id,))
     return render_template('album.html', album=album_info, songs=songs)
 
-
+# Author: Gemini (Me for most, Gemini for fts5 search ranking)
 @app.route('/search')
 def search_page():
-    q = request.args.get('q')
+    q = request.args.get('q', '').strip()  # Fallback to empty string if missing
+
     if not q:
         abort(400)
-    songs = query_safe("SELECT songs.id AS id, name, game, img_src, stream_src FROM songs JOIN albums ON songs.album_id = albums.id WHERE name LIKE '%' || ? || '%'", (q,))
-    albums = query_safe("SELECT * FROM albums WHERE game LIKE '%' || ? || '%'", (q,))
+
+    # Split query strings cleanly by spaces
+    words = [w.strip() for w in q.split() if w.strip()]
+
+    if not words:
+        # FIXED: Pass empty lists to the template instead of returning raw []
+        return render_template('search.html', songs=[], albums=[], q=q)
+
+    # FIXED: Escaped quotes correctly to prevent Python interpretation syntax errors
+    safe_words = [f'"{w.replace("\"", "\"\"")}"' for w in words]
+    final_query = " OR ".join(safe_words)
+
+    # Executing parallel queries safely across your workspace threads
+    songs = query_safe("""
+                       SELECT songs.*, game, img_src
+                       FROM songs JOIN albums ON songs.album_id = albums.id
+                                JOIN songs_fts ON songs.id = songs_fts.rowid
+                       WHERE songs_fts.name MATCH ?
+                       ORDER BY bm25(songs_fts) ASC;
+                       """, (final_query,))
+
+    albums = query_safe("""
+                        SELECT albums.*
+                        FROM albums
+                                 JOIN albums_fts ON albums.id = albums_fts.rowid
+                        WHERE albums_fts.name MATCH ?
+                        ORDER BY bm25(albums_fts) ASC;
+                        """, (final_query,))
+
     return render_template('search.html', songs=songs, albums=albums, q=q)
+
 
 @app.route('/api/update-playing-song', methods=["POST"])
 def update_playing_song():
@@ -107,6 +136,8 @@ def update_analytics():
     analytic_type = body.get("type")
     analytic_id = body.get("id")
     analytic_amount = body.get("amount")
+    print(analytic_id)
+    print(current_user.get_id())
     if not (analytic_type and analytic_amount and analytic_id):
         return {"success": False}, 400
     try:

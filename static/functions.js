@@ -19,7 +19,12 @@ function getUniqueListenedStats(audio) {
 }
 
 async function sendAnalytics(type, id, amount) {
-    const payload = {type, id, amount};
+    let payload = {}
+    if (id === -1) {
+        payload = {type, id: playingAudioId, amount};
+    } else {
+        payload = {type, id, amount};
+    }
     console.log(payload)
     try {
         const response = await fetch('/api/send-analytics', {
@@ -99,13 +104,13 @@ function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 
     mainThumbnailImg.src = imgSrc;
     const mediaTitle = document.getElementById('media-title');
     const mediaDesc = document.getElementById('media-desc');
-    mediaTitle.innerHTML = title;
-    mediaDesc.innerHTML = `Song &bull; ${game}`;
+    mediaTitle.innerHTML = title.replaceAll("＇", "'").replaceAll("：", ":");
+    mediaDesc.innerHTML = `Song &bull; ${game.replaceAll("＇", "'").replaceAll("：", ":")}`;
     // Gemini
     const audioElement = document.querySelector('media-controller [slot="media"]');
 
     // 2. Assign the new URL path
-    audioElement.src = stream;
+    audioElement.src = String.raw`${stream.replaceAll("＇", "'")}`;
 
     // 3. Force the browser to reset and load the new asset
     audioElement.load();
@@ -127,3 +132,6 @@ function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 
 
 
 }
+document.addEventListener("turbo:load", function () {
+            fitty('.fit', {minSize: 11, maxSize: 20});
+        });
