@@ -1,20 +1,44 @@
 {% extends "layout.html" %}
 
 {% block title %}
-{{ album["game"] }}
+    {{ album["game"] }}
 {% endblock %}
 
 {% block body %}
-    <img src="{{ album["img_src"] }}" alt="{{ album["game"] }}">
-    <h1>{{ album["game"] | replace("：", ":") }}</h1>
-    <hr>
-    <h1>Songs</h1>
-    <hr>
-    <ul>
-        {% for song in songs %}
-            <li>
-                <button type="button" onclick="playAudio('{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃")}}', '{{ album["img_src"] }}', '{{ song["name"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃")}}', '{{ album["game"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃")}}', '{{ song["id"] }}')" class="btn btn-primary">{{ song["name"] }}</button>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="d-flex">
+        <div class="d-flex flex-column" style="width: 50%">
+            <div class="d-flex tight-blur-wrapper"
+                 style="height: 14rem; width: 14rem; --bg-image: url('{{ album["img_src"] }}')">
+                <img src="{{ album["img_src"] }}" alt="{{ album["game"] }}" role="presentation"
+                     style="height: 100%; width: 100%; object-fit: contain">
+            </div>
+            <h1>{{ album["game"] | replace("：", ":") }}</h1>
+        </div>
+        <div class="d-flex flex-column" style="width: 50%">
+            <h1>Songs</h1>
+            <hr>
+            {% for song in songs %}
+                <div role="button" tabindex="0"
+                                onclick="playAudio('{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃") }}', '{{ album["img_src"] }}', '{{ song["name"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ album["game"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ song["id"] }}')"
+                                class="btn btn-link btn-shadow-hover d-block text-decoration-none text-dark">
+                <div class="d-flex align-items-center gap-2 py-2">
+                   <span class="fs-5">{{ loop.index }}.</span>
+                    <span class="fs-5">{{ song["name"] }}</span>
+                </div>
+                </div>
+
+            {% endfor %}
+            <!--
+            <ol>
+                {% for song in songs %}
+                    <li>
+                        <button type="button"
+                                onclick="playAudio('{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃") }}', '{{ album["img_src"] }}', '{{ song["name"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ album["game"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ song["id"] }}')"
+                                class="btn btn-primary">{{ song["name"] }}</button>
+                    </li>
+                {% endfor %}
+            </ol>
+            -->
+        </div>
+    </div>
 {% endblock %}
