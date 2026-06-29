@@ -8,7 +8,16 @@
 {% block head %}
     <script>
         document.addEventListener("turbo:load", function () {
-            new Splide('.splide', {
+            new Splide('#for-you-carousel', {
+                fixedWidth: '18rem',
+                perMove: 2,
+                gap: '0.5rem',
+                pagination: false
+            }).mount()
+        });
+
+        document.addEventListener("turbo:load", function () {
+            new Splide('#top-10-carousel', {
                 fixedWidth: '18rem',
                 perMove: 2,
                 gap: '0.5rem',
@@ -21,10 +30,10 @@
 
 {% block body %}
     <h1>For you</h1>
-    <section class="splide" aria-label="For You">
+    <section class="splide" aria-label="For You" id="for-you-carousel">
       <div class="splide__track">
         <ul class="splide__list">
-            {% for album in albums %}
+            {% for album in for_you %}
             <li class="splide__slide">
                 {{ macros.album_card(album["game"], album["img_src"], album["release_year"], album["id"]) }}
             </li>
@@ -37,7 +46,17 @@
     <h2>TODO</h2>
     <hr>
     <h1>Top 10 songs</h1>
-    <h2>TODO</h2>
+    <section class="splide" aria-label="Top 10" id="top-10-carousel">
+      <div class="splide__track">
+        <ul class="splide__list">
+            {% for song in top_10 %}
+            <li class="splide__slide">
+                {{ macros.song_card(song["name"], song["game"], song["img_src"], song["stream_src"], song["id"]) }}
+            </li>
+            {% endfor %}
+        </ul>
+      </div>
+    </section>
     <hr>
     <h1>Browse by category</h1>
     <h2>TODO</h2>

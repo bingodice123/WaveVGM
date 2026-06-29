@@ -69,8 +69,9 @@ def query_safe(query: str, values: tuple = tuple()):
 
 @app.route('/')
 def index():
-    albums = query_safe("SELECT * FROM albums LIMIT 10")
-    return render_template('index.html', albums=albums)
+    for_you = query_safe("SELECT * FROM albums LIMIT 10")
+    top_10 = query_safe("SELECT name, game, img_src, stream_src, songs.id AS id FROM songs JOIN albums ON songs.album_id = albums.id JOIN analytics ON analytics.song_id = songs.id ORDER BY analytics.views DESC LIMIT 10")
+    return render_template('index.html', for_you=for_you, top_10=top_10)
 
 @app.route('/album')
 def album_page():
