@@ -17,7 +17,7 @@ h1 {
     position: relative;
     display: inline-block; /* Crucial: Shrinks width to fit the image */
     max-width: 100%;
-    max-height: 300px; /* Sets the absolute boundary limit */
+    max-height: 100%; /* Sets the absolute boundary limit */
     overflow: hidden; /* Clips the background blur bleed */
     border-top-left-radius: var(--bs-card-inner-border-radius);
     border-top-right-radius: var(--bs-card-inner-border-radius);
@@ -29,7 +29,7 @@ h1 {
     z-index: 2;
     display: block; /* Removes bottom whitespace padding bugs */
     max-width: 100%;
-    max-height: 300px; /* Must match the parent wrapper limit */
+    max-height: 100%; /* Must match the parent wrapper limit */
     width: auto;
     height: auto;
     object-fit: contain; /* Scales and reveals the full image */
@@ -83,21 +83,39 @@ body::-webkit-scrollbar,
   padding-bottom: 6rem;   /* space for media bar */
   box-sizing: border-box;
 }
-
-media-controller
-{
-    --media-primary-color: black;
-    --media-secondary-color: transparent;
-    --media-control-hover-background: rgb(255 255 255 / 0.25);
-    --media-background-color: transparent;
-    --bs-body-color: transparent;
+/* 1. Global Controller & Theme Rules */
+media-controller {
+  --media-primary-color: black;
+  --media-secondary-color: transparent;
+  --media-control-hover-background: rgb(255 255 255 / 0.25);
+  --media-background-color: transparent;
+  --bs-body-color: transparent;
 }
 
-media-time-range
-{
-    --media-time-range-buffered-color: transparent;
-    --media-range-track-background: rgb(100 100 100 / 0.75)
+/* 2. Fix the Button Wrapper Sizing */
+media-controller, media-play-button, media-mute-button {
+  --media-button-icon-width: 2rem;
+  --media-button-icon-height: 2rem;
+  --media-control-height: 80px;
 }
+
+/* 3. Prevent the Button Container from Collapsing */
+media-play-button, media-mute-button {
+  flex-shrink: 0;         /* Stops Flexbox from squishing the button */
+  min-width: 52px;        /* Forces a square box for your big play icon */
+  width: 52px;
+}
+
+/* 4. Fix the Sizing on the Time Range Slider */
+media-time-range {
+  --media-time-range-buffered-color: transparent;
+  --media-range-track-background: rgb(100 100 100 / 0.75);
+
+  flex-grow: 0;           /* Prevents it from aggressively eating layout space */
+  flex-shrink: 0;         /* Stops it from deforming on smaller windows */
+  width: 200px !important;
+}
+
 /* Hide arrows and pagination when there aren't enough slides */
 .splide:not(.is-overflow) .splide__arrows
 {

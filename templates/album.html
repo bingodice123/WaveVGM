@@ -4,41 +4,73 @@
     {{ album["game"] }}
 {% endblock %}
 
+{% block head %}
+    <script>
+        document.addEventListener("turbo:load", function () {
+            fitty('#album-title', {
+                minSize: 11
+            });
+        });
+        document.addEventListener("turbo:load", function () {
+            fitty('#album-details', {
+                minSize: 11
+            });
+        });
+        document.addEventListener("turbo:load", function () {
+            queue_album = []
+            {% for song in songs %}
+                queue_album.push({stream: '{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃") }}', imgSrc: '{{ album["img_src"] }}', title: '{{ song["name"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', game: '{{ album["game"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', songId: '{{ song["id"] }}'})
+            {% endfor %}
+        });
+        document.addEventListener("turbo:load", function () {
+            for (let i of document.querySelectorAll(".time-label")) {
+                getAudioDuration(i.dataset.link).then((result) => {
+                    i.textContent = result;
+                });
+            }
+        });
+
+    </script>
+{% endblock %}
+
+
 {% block body %}
-    <div class="d-flex">
-        <div class="d-flex flex-column" style="width: 50%">
-            <div class="d-flex tight-blur-wrapper"
-                 style="height: 14rem; width: 14rem; --bg-image: url('{{ album["img_src"] }}')">
+    <div class="d-flex w-100">
+        <div class="d-flex flex-column align-items-center w-50 my-3 gap-3">
+            <div class="d-block overflow-hidden" style="width: 50vh; height: 50vh">
+                <div class="tight-blur-wrapper w-100 h-100 overflow-hidden d-flex justify-content-center rounded-3"
+                 style="--bg-image: url('{{ album["img_src"] }}');">
                 <img src="{{ album["img_src"] }}" alt="{{ album["game"] }}" role="presentation"
-                     style="height: 100%; width: 100%; object-fit: contain">
+                     style="object-fit: contain">
             </div>
-            <h1>{{ album["game"] | replace("：", ":") }}</h1>
+            </div>
+            <div class="d-block" style="width: 50vh; max-height: 100%">
+                <h1 id="album-title" class="text-center mb-4">{{ album["game"] | replace("：", ":") }}</h1>
+                <div class="d-flex justify-content-center" style="width: 50vh; max-height: 100%">
+                    <div class="d-flex justify-content-center" style="width: 20vh; max-height: 100%">
+                                            <h5 class="text-center mb-0" id="album-details">Album &bull; {{ album["release_year"] }}</h5>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
-        <div class="d-flex flex-column" style="width: 50%">
-            <h1>Songs</h1>
-            <hr>
+        <div class="d-flex flex-column w-50 my-3 overflow-y-scroll hide-scrollbar" style="height: calc(100vh - 11rem);">
             {% for song in songs %}
                 <div role="button" tabindex="0"
-                                onclick="playAudio('{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃") }}', '{{ album["img_src"] }}', '{{ song["name"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ album["game"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ song["id"] }}')"
+                                onclick="playAudio('{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃") }}', '{{ album["img_src"] }}', '{{ song["name"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ album["game"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ song["id"] }}', false)"
                                 class="btn btn-link btn-shadow-hover d-block text-decoration-none text-dark">
-                <div class="d-flex align-items-center gap-2 py-2">
-                   <span class="fs-5">{{ loop.index }}.</span>
-                    <span class="fs-5">{{ song["name"] }}</span>
-                </div>
-                </div>
+                <div class="d-flex align-items-center gap-4 py-2">
+                   <span class="fs-3 fw-light" style="width: 2rem">{{ loop.index }}</span>
+                    <div class="d-flex flex-column align-items-start">
+                        <p class="mb-0 fs-5 fw-bold">{{ song["name"] | replace("⧸", "/") }}</p>
+                        <p class="mb-0 fs-6 fw-light">Song &bull; {{ song["views"] }} play{{ "" if song["views"] == 1 else "s" }}</p>
+                    </div>
+                    <div class="d-flex justify-content-end flex-grow-1"><p class="fw-light mb-0 time-label" data-link='{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃") }}'>time</p></div>
 
+                </div>
+                </div>
             {% endfor %}
-            <!--
-            <ol>
-                {% for song in songs %}
-                    <li>
-                        <button type="button"
-                                onclick="playAudio('{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃") }}', '{{ album["img_src"] }}', '{{ song["name"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ album["game"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ song["id"] }}')"
-                                class="btn btn-primary">{{ song["name"] }}</button>
-                    </li>
-                {% endfor %}
-            </ol>
-            -->
         </div>
     </div>
 {% endblock %}

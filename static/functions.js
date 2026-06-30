@@ -1,5 +1,7 @@
 let playingAudioId = null;
 const liked_classes = {true: 'bi-hand-thumbs-up-fill', false: 'bi-hand-thumbs-up'}
+let queue = [];
+let queue_album = [];
 
 function getUniqueListenedStats(audio) {
     const ranges = audio.played; // Native browser TimeRanges object
@@ -12,7 +14,6 @@ function getUniqueListenedStats(audio) {
 
     const totalDuration = audio.duration || 0;
     const percentListened = totalDuration > 0 ? (totalSecondsListened / totalDuration) : 0;
-
     return {
         seconds: totalSecondsListened,
         percent: percentListened
@@ -73,6 +74,7 @@ window.addEventListener('pagehide', () => {
 
     if (playingAudioId) {
         const audio = document.querySelector('#vgm-audio')
+        console.log("page hidden")
         const payload = {type: 'retention_percent', amount: getUniqueListenedStats(audio)["percent"], id: playingAudioId}
         fetch('/api/send-analytics', {
             method: 'POST',
@@ -84,13 +86,30 @@ window.addEventListener('pagehide', () => {
 });
 
 
+function endSong() {
+    if (queue) {
+            console.log(queue)
+            playAudio(queue[0].stream, queue[0].imgSrc, queue[0].title, queue[0].game, queue[0].songId, true);
+            queue.shift();
+        }
+}
+
 // Play audio 50% Gemini
-function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 'Unknown', game = 'Unknown', songId) {
+function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 'Unknown', game = 'Unknown', songId, queuePlay) {
     // Me
     if (playingAudioId) {
         sendRetentionPercent()
     }
-
+    if (!queuePlay) {
+        queue = [...queue_album];
+        const index = queue.findIndex(u => u.songId === songId);
+        if (index !== -1) {
+            queue.splice(0, index + 1);
+        } else {
+            // Played from search or top 10 songs, get album data
+            
+        }
+    }
     // Gemini
 
     // 1. Select the media slot element nested inside media-chrome
@@ -109,6 +128,7 @@ function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 
     mediaDesc.innerHTML = `Song &bull; ${game.replaceAll("＇", "'").replaceAll("：", ":").replaceAll("＃", "#")}`;
     // Gemini
     const audioElement = document.querySelector('media-controller [slot="media"]');
+    audioElement.removeEventListener('ended', endSong);
 
     // 2. Assign the new URL path
     audioElement.src = String.raw`${stream.replaceAll("＇", "'").replaceAll("＃", "%23")}`;
@@ -140,12 +160,31 @@ function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 
     document.getElementById("like-button").classList.add(liked_classes[data["liked"]])
   })
     // 4. (Optional) Initiate playback programmatically
-    audioElement.play().catch(error => {
+    audioElement.play().then(result => {
+        audioElement.addEventListener("ended", endSong);
+    }).catch(error => {
         console.log("Playback blocked until user interaction occurs.");
     });
+
 
 
 }
 document.addEventListener("turbo:load", function () {
             fitty('.fit', {minSize: 11, maxSize: 20});
         });
+
+async function getAudioDuration(url) {
+
+
+  return await new Promise((resolve) => {
+      const audio = new Audio(String.raw`${url.replaceAll("＇", "'").replaceAll("＃", "%23")}`);
+
+      audio.addEventListener("loadedmetadata", () => {
+              // Optional: Format into minutes and seconds
+          const durationInSeconds = audio.duration;
+             const minutes = Math.floor(durationInSeconds / 60);
+    const seconds = Math.floor(durationInSeconds % 60);
+          resolve(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+      }, {once: true});
+  });
+}

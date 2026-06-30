@@ -82,7 +82,7 @@ def album_page():
         album_info = query_safe("SELECT * FROM albums WHERE id = ?", (album_id,))[0]
     except IndexError:
         abort(404)
-    songs = query_safe("SELECT * FROM songs WHERE album_id = ?", (album_id,))
+    songs = query_safe("SELECT songs.*, views FROM songs JOIN analytics ON songs.id = analytics.song_id WHERE album_id = ?", (album_id,))
     return render_template('album.html', album=album_info, songs=songs)
 
 # Author: Gemini (Me for most, Gemini for fts5 search ranking)
@@ -147,6 +147,7 @@ def update_analytics():
     analytic_type = body.get("type")
     analytic_id = body.get("id")
     analytic_amount = body.get("amount")
+    print(f"{analytic_type} {analytic_id} {analytic_amount}")
     if not (analytic_type and analytic_amount and analytic_id):
         return {"success": False}, 400
     try:

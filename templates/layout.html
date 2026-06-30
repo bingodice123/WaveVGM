@@ -70,19 +70,20 @@
             </div>
         </div>
     </div>
-    <div class="d-flex col-4 justify-content-center m-0 align-items-center">
+    <div class="d-flex col-4 justify-content-center m-0 align-items-center" style="height: 5rem">
         <media-controller audio>
   <audio
     slot="media"
     src=""
     id="vgm-audio"
   ></audio>
-  <media-control-bar>
+  <media-control-bar style="--media-font-size: 1rem; display: flex;">
     <media-play-button></media-play-button>
     <media-time-display showduration></media-time-display>
     <media-time-range></media-time-range>
     <media-mute-button></media-mute-button>
     <media-volume-range></media-volume-range>
+    <media-loop-button></media-loop-button>
   </media-control-bar>
 </media-controller>
     </div>
