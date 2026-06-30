@@ -10,18 +10,22 @@ import os
 from dotenv import load_dotenv
 import emoji
 
+# Me
 load_dotenv("keys.env")
 
 app = Flask(__name__)
+# Gemini
 DB_EXECUTOR = ThreadPoolExecutor(max_workers=1)
+# Me
 VALID_ANALYTICS = ["views", "likes", "exits", "retention_percent"]
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-
+#ChatGPT
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
 
+# Author: ChatGPT
 class User(UserMixin):
     def __init__(self, row):
         self.id = str(row["id"])
@@ -29,6 +33,7 @@ class User(UserMixin):
         self.password_hash = row["password_hash"]
 
 
+# Author: ChatGPT
 @login_manager.user_loader
 def load_user(user_id):
     rows = query_safe("SELECT * FROM users WHERE id = ?", (user_id,))
@@ -37,6 +42,7 @@ def load_user(user_id):
     return User(rows[0])
 
 
+# Author: me
 @app.context_processor
 def inject_global_functions():
     def has_liked():
@@ -47,9 +53,11 @@ def inject_global_functions():
     # Return a dictionary exposing the function to Jinja
     return dict(has_liked=has_liked)
 
+# Author: me
 def has_emoji(text):
     return bool(emoji.distinct_emoji_list(text))
 
+# Author: me
 def sqlite_worker(query: str, values: tuple = tuple()):
     conn = sqlite3.connect('wavevgm.db')
     try:
@@ -63,12 +71,12 @@ def sqlite_worker(query: str, values: tuple = tuple()):
     finally:
         conn.close()
 
-
+# Author: me
 def query_safe(query: str, values: tuple = tuple()):
     future = DB_EXECUTOR.submit(sqlite_worker, query, values)
     return [dict(i) for i in future.result()]
 
-
+# Author: me/gemini (gemini for joining dicts for algorithm, me for everything else)
 @app.route('/')
 def index():
     if current_user.is_authenticated:
@@ -141,6 +149,7 @@ def index():
     top_10 = query_safe("SELECT name, game, img_src, stream_src, songs.id AS id FROM songs JOIN albums ON songs.album_id = albums.id JOIN analytics ON analytics.song_id = songs.id ORDER BY analytics.views DESC LIMIT 10")
     return render_template('index.html', for_you=for_you, top_10=top_10)
 
+# Author: Me
 @app.route('/album')
 def album_page():
     album_id = request.args.get('id')
@@ -153,7 +162,7 @@ def album_page():
     songs = query_safe("SELECT songs.*, views FROM songs JOIN analytics ON songs.id = analytics.song_id WHERE album_id = ?", (album_id,))
     return render_template('album.html', album=album_info, songs=songs)
 
-# Author: Gemini (Me for most, Gemini for fts5 search ranking)
+# Author: Gemini and me (Me for most, Gemini for fts5 search ranking)
 @app.route('/search')
 def search_page():
     q = request.args.get('q', '').strip()  # Fallback to empty string if missing
@@ -191,7 +200,7 @@ def search_page():
 
     return render_template('search.html', songs=songs, albums=albums, q=q)
 
-
+# Author: me
 @app.route('/api/update-playing-song', methods=["POST"])
 def update_playing_song():
     body = request.get_json()
@@ -199,6 +208,7 @@ def update_playing_song():
     session["id"] = playing_song
     return {"Success": True}
 
+# Author: me
 @app.route('/api/has-liked', methods=["POST"])
 def has_liked():
     body = request.get_json()
@@ -209,6 +219,7 @@ def has_liked():
         abort(500)
 
 
+# Author: me
 @app.route('/api/send-analytics', methods=["POST"])
 def update_analytics():
     body = request.get_json()
@@ -257,6 +268,7 @@ def update_analytics():
         return {"success": False}, 500
     return {"success": True}, 200
 
+# Author: ChatGPT / me (me for get, gpt for post and login stuff)
 @app.route("/login", methods=["GET", "POST"])
 def login(error = ""):
 
@@ -283,6 +295,7 @@ def login(error = ""):
         return render_template("login.html", error=error)
 
 
+# Author: ChatGPT (me for get, gpt for post)
 @app.route("/logout", methods=["GET", "POST"])
 @login_required
 def logout():
@@ -292,6 +305,7 @@ def logout():
     else:
         return render_template("logout.html")
 
+# Author: me
 @app.route("/register", methods=["GET", "POST"])
 def register(error = ""):
     if request.method == "POST" and not error:
@@ -324,6 +338,8 @@ def register(error = ""):
         return redirect("/", code=303)
     else:
         return render_template("./register.html", error=error)
+
+# Author: ChatGPT
 @app.route("/me")
 @login_required
 def me():
