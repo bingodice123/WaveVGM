@@ -1,3 +1,5 @@
+import math
+
 from flask import Flask, render_template, request, abort, redirect, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -69,7 +71,66 @@ def query_safe(query: str, values: tuple = tuple()):
 
 @app.route('/')
 def index():
-    for_you = query_safe("SELECT * FROM albums LIMIT 10")
+    user_global_retention = query_safe("SELECT * FROM user_global_retention WHERE user_id = ?", (current_user.get_id(),))[0]["retention_percent"]
+    songs_album = [{"song_id" : i["id"], "album_id" : i["album_id"]} for i in query_safe("SELECT * FROM songs")]
+    user_retention_song_ratio = [{"song_id" : i["song_id"], "user_retention_song_ratio" : min(i["retention_percent"] / user_global_retention, 1.5) / 1.5} for i in query_safe("SELECT * FROM user_retention WHERE user_id = ?", (current_user.get_id(),))]
+    user_retention_album_ratio = [{"album_id": i["album_id"], "user_retention_album_ratio" : min(i["retention_percent"] / user_global_retention, 1.5) / 1.5} for i in query_safe("SELECT album_id, AVG(retention_percent) as retention_percent FROM user_retention WHERE user_id = ? GROUP BY album_id", (current_user.get_id(),))]
+    user_liked_songs = [i["song_id"] for i in query_safe("SELECT song_id FROM user_likes WHERE user_id = ?", (current_user.get_id(),))]
+    user_liked = [{"song_id" : i["id"], "liked" : 1 if i["id"] in user_liked_songs else 0} for i in query_safe("SELECT * FROM songs")]
+    global_retention_percentage = [{"song_id" : i["song_id"], "global_retention_ratio" : i["retention_percent"]} for i in query_safe("SELECT song_id, retention_percent FROM analytics")]
+    max_views = query_safe("SELECT views FROM analytics ORDER BY views DESC LIMIT 1")[0]["views"]
+    normalized_views = [{"song_id" : i["song_id"], "views_normalized" : math.log(i["views"] + 1)/math.log(max_views + 1)} for i in query_safe("SELECT song_id, views FROM analytics")]
+    # Gemini
+    # =====================================================================
+    # --- STEP 1: Build Index Maps for O(1) Lookups ---
+    # =====================================================================
+    # Song-specific lookups (Keyed by song_id)
+    song_ratio_map = {i["song_id"]: i["user_retention_song_ratio"] for i in user_retention_song_ratio}
+    liked_map = {i["song_id"]: i["liked"] for i in user_liked}
+    global_ret_map = {i["song_id"]: i["global_retention_ratio"] for i in global_retention_percentage}
+    views_map = {i["song_id"]: i["views_normalized"] for i in normalized_views}
+
+    # Album generic lookup (Keyed by album_id)
+    album_ratio_map = {i["album_id"]: i["user_retention_album_ratio"] for i in user_retention_album_ratio}
+
+    # =====================================================================
+    # --- STEP 2: Combine Everything Using the Bridge (songs_album) ---
+    # =====================================================================
+    joined_songs_metrics = []
+
+    for item in songs_album:
+        sid = item["song_id"]
+        aid = item["album_id"]
+
+        # Using .get() fallback ensures your code won't crash if a song has
+        # no analytics records, no likes, or no user retention history yet.
+        combined_row = {
+            "song_id": sid,
+            "album_id": aid,
+            "user_retention_song_ratio": song_ratio_map.get(sid, 0.0),
+            "user_retention_album_ratio": album_ratio_map.get(aid, 0.0),  # Generic data linked via aid
+            "liked": liked_map.get(sid, 0),
+            "global_retention_ratio": global_ret_map.get(sid, 0.0),
+            "views_normalized": views_map.get(sid, 0.0)
+        }
+
+        joined_songs_metrics.append(combined_row)
+
+    # me
+    scores = {i["song_id"] : (i["user_retention_song_ratio"] * 0.4) + (i["user_retention_album_ratio"] * 0.25) + (i["liked"] * 0.2) + (i["global_retention_ratio"] * 0.1) + (i["views_normalized"] * 0.05) for i in joined_songs_metrics}
+    query_safe("CREATE TEMP TABLE for_you_scores (id INT, score NUMERIC)")
+    conn = sqlite3.connect('wavevgm.db', check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA foreign_keys = ON")
+    cursor.execute("ATTACH DATABASE ':memory:' AS temp_db")
+    cursor.execute("CREATE TABLE temp_db.scores (song_id INT, score NUMERIC)")
+    cursor.executemany("INSERT INTO temp_db.scores VALUES (?, ?)", scores.items())
+    cursor.execute("SELECT songs.*, albums.img_src, albums.game FROM songs JOIN temp_db.scores temp_db ON songs.id = temp_db.song_id JOIN albums ON songs.album_id = albums.id ORDER BY score DESC LIMIT 10")
+    for_you = [dict(i) for i in cursor.fetchall()]
+    conn.commit()
+    cursor.execute("DETACH DATABASE temp_db")
+    conn.close()
     top_10 = query_safe("SELECT name, game, img_src, stream_src, songs.id AS id FROM songs JOIN albums ON songs.album_id = albums.id JOIN analytics ON analytics.song_id = songs.id ORDER BY analytics.views DESC LIMIT 10")
     return render_template('index.html', for_you=for_you, top_10=top_10)
 
@@ -177,8 +238,11 @@ def update_analytics():
         if analytic_type == "retention_percent":
             if query_safe("SELECT retention_percent FROM analytics WHERE song_id = ?", (analytic_id,))[0]["retention_percent"] == 0:
                 query_safe("UPDATE analytics SET retention_percent = ? WHERE song_id = ?", (analytic_amount, analytic_id))
+                query_safe("UPDATE user_global_retention SET retention_percent = ? WHERE user_id = ?",(analytic_amount, current_user.get_id()))
             else:
                 query_safe("UPDATE analytics SET retention_percent = (retention_percent + ?) / 2.0 WHERE song_id = ?", (analytic_amount, analytic_id))
+                query_safe("UPDATE user_global_retention SET retention_percent = (retention_percent + ?) / 2.0 WHERE user_id = ?",(analytic_amount, current_user.get_id()))
+            query_safe("INSERT INTO user_retention (user_id, song_id, album_id, retention_percent) VALUES (?, ?, ?, ?) ON CONFLICT(user_id, song_id) DO UPDATE SET retention_percent = ?", (current_user.get_id(), analytic_id, query_safe("SELECT album_id FROM songs WHERE id = ?", (analytic_id,))[0]["album_id"], analytic_amount, analytic_amount))
         else:
             query_safe(f"UPDATE analytics SET {analytic_type} = {analytic_type} + ? WHERE song_id = ?", (analytic_amount, analytic_id))
     except sqlite3.OperationalError:

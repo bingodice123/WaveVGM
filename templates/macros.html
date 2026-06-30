@@ -20,7 +20,7 @@
                 <img src="{{ img_src }}" class="card-img-top" alt="" role="presentation" style="height: 100%; width: 100%; object-fit: contain">
             </div>
             <div class="card-body" style="height: 6rem">
-                <div class="card-title d-flex align-items-center" style="height: calc(3rem - 16px);"><h5 class="fit">{{ name | replace("：", ":")}}</h5></div>
+                <div class="card-title d-flex align-items-center" style="height: calc(3rem - 16px);"><h5 class="fit">{{ name | replace("：", ":") | replace("⧸", "/")}}</h5></div>
                 <div class="card-text d-flex align-items-center" style="height: calc(3rem - 16px);"><p class="fit">Song &bull; {{ game | replace("：", ":")}}</p></div>
             </div>
         </div>

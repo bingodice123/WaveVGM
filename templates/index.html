@@ -33,9 +33,9 @@
     <section class="splide" aria-label="For You" id="for-you-carousel">
       <div class="splide__track">
         <ul class="splide__list">
-            {% for album in for_you %}
+            {% for song in for_you %}
             <li class="splide__slide">
-                {{ macros.album_card(album["game"], album["img_src"], album["release_year"], album["id"]) }}
+                {{ macros.song_card(song["name"], song["game"], song["img_src"], song["stream_src"], song["id"]) }}
             </li>
             {% endfor %}
         </ul>
