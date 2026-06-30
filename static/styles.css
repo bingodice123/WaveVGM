@@ -133,3 +133,8 @@ media-time-range {
   /* Exactly replicates $box-shadow-lg */
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
 }
+
+/* Custom CSS */
+.no-caret::after {
+    display: none !important; /* Hides the caret arrow */
+}

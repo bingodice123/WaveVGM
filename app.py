@@ -50,8 +50,13 @@ def inject_global_functions():
             return bool(query_safe("SELECT * FROM user_likes WHERE user_id = ? AND song_id = ?", (current_user.get_id(), session.get("id") or -1)))
         except sqlite3.OperationalError:
             abort(500)
+    def get_playlists():
+        try:
+            return query_safe("SELECT * FROM user_playlists WHERE user_id = ?", (current_user.get_id(),))
+        except sqlite3.OperationalError:
+            abort(500)
     # Return a dictionary exposing the function to Jinja
-    return dict(has_liked=has_liked)
+    return dict(has_liked=has_liked, get_playlists=get_playlists)
 
 # Author: me
 def has_emoji(text):
@@ -209,12 +214,26 @@ def console():
     try:
         console_info = query_safe("SELECT * FROM consoles WHERE id = ?", (console_id,))[0]
     except IndexError:
-        abort(400)
+        abort(404)
     except sqlite3.OperationalError:
         abort(500)
     albums = query_safe("SELECT * FROM albums WHERE console_id = ?", (console_id,))
     return render_template("console.html", albums=albums, console_info=console_info)
 
+@app.route('/playlist')
+def playlist():
+    playlist_id = request.args.get("id")
+    if not playlist_id:
+        abort(400)
+    try:
+        songs = query_safe("SELECT songs.* FROM playlist_songs JOIN songs ON playlist_songs.song_id = songs.id WHERE playlist_id = ?", (playlist_id,))
+        playlist_info = query_safe("SELECT * FROM user_playlists WHERE id = ?", (playlist_id,))
+        albums = query_safe("SELECT albums.* FROM albums JOIN songs ON albums.id = songs.album_id JOIN playlist_songs ON playlist_songs.song_id = songs.id WHERE playlist_id = ? ORDER BY playlist_songs.rowid", (playlist_id,))
+    except sqlite3.OperationalError:
+        abort(500)
+    except IndexError or KeyError:
+        abort(404)
+    return render_template("playlist.html", songs=songs, playlist_info=playlist_info, albums=albums)
 
 # API stuff
 
@@ -229,7 +248,7 @@ def get_album_list():
         album_id = query_safe("SELECT id FROM albums WHERE game = ?", (album_name,))[0]["id"]
         return {"list": query_safe("SELECT stream_src AS stream, img_src AS imgSrc, name AS title, game, songs.id AS songId FROM songs JOIN albums ON songs.album_id = albums.id WHERE album_id = ?", (album_id,))}
     except IndexError or KeyError:
-        abort(400)
+        abort(404)
     except sqlite3.OperationalError:
         abort(500)
 
