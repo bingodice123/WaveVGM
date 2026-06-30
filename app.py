@@ -200,6 +200,24 @@ def search_page():
 
     return render_template('search.html', songs=songs, albums=albums, q=q)
 
+
+# API stuff
+
+# Author: me
+@app.route('/api/get-album-list', methods=["POST"])
+def get_album_list():
+    body = request.get_json()
+    album_name = body.get("name")
+    if album_name is None:
+        abort(400)
+    try:
+        album_id = query_safe("SELECT id FROM albums WHERE game = ?", (album_name,))[0]["id"]
+        return {"list": query_safe("SELECT stream_src AS stream, img_src AS imgSrc, name AS title, game, songs.id AS songId FROM songs JOIN albums ON songs.album_id = albums.id WHERE album_id = ?", (album_id,))}
+    except IndexError or KeyError:
+        abort(400)
+    except sqlite3.OperationalError:
+        abort(500)
+
 # Author: me
 @app.route('/api/update-playing-song', methods=["POST"])
 def update_playing_song():
@@ -226,7 +244,6 @@ def update_analytics():
     analytic_type = body.get("type")
     analytic_id = body.get("id")
     analytic_amount = body.get("amount")
-    print(f"{analytic_type} {analytic_id} {analytic_amount}")
     if not (analytic_type and analytic_amount and analytic_id):
         return {"success": False}, 400
     try:

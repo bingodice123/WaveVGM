@@ -58,7 +58,7 @@
         <div class="d-flex flex-column w-50 my-3 overflow-y-scroll hide-scrollbar" style="height: calc(100vh - 11rem);">
             {% for song in songs %}
                 <div role="button" tabindex="0"
-                                onclick="playAudio('{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃") }}', '{{ album["img_src"] }}', '{{ song["name"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ album["game"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ song["id"] }}', false)"
+                                onclick="playAudio(this, '{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃") }}', '{{ album["img_src"] }}', '{{ song["name"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ album["game"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', '{{ song["id"] }}', false)"
                                 class="btn btn-link btn-shadow-hover d-block text-decoration-none text-dark">
                 <div class="d-flex align-items-center gap-4 py-2">
                    <span class="fs-3 fw-light" style="width: 2rem">{{ loop.index }}</span>

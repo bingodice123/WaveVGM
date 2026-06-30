@@ -89,26 +89,56 @@ window.addEventListener('pagehide', () => {
 function endSong() {
     if (queue) {
             console.log(queue)
-            playAudio(queue[0].stream, queue[0].imgSrc, queue[0].title, queue[0].game, queue[0].songId, true);
+            playAudio(null, queue[0].stream, queue[0].imgSrc, queue[0].title, queue[0].game, queue[0].songId, true);
             queue.shift();
         }
 }
 
+async function getAlbumList(name) {
+    try {
+        const response = await fetch("/api/get-album-list", {
+        method: "post",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name})
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP Error! Status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(`Error: ${error}`);
+        throw error;
+    }
+
+}
+
 // Play audio 50% Gemini
-function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 'Unknown', game = 'Unknown', songId, queuePlay) {
+function playAudio(element, stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 'Unknown', game = 'Unknown', songId, queuePlay) {
     // Me
     if (playingAudioId) {
         sendRetentionPercent()
     }
     if (!queuePlay) {
-        queue = [...queue_album];
-        const index = queue.findIndex(u => u.songId === songId);
-        if (index !== -1) {
-            queue.splice(0, index + 1);
+        if (queue_album.length !== 0) {
+            queue = [...queue_album];
+            const index = queue.findIndex(u => u.songId === songId);
+            if (index !== -1) {
+                queue.splice(0, index + 1);
+            }
         } else {
-            // Played from search or top 10 songs, get album data
-            
+            getAlbumList(element.dataset.albumName).then((result) => {
+                console.log(result);
+                queue = result.list;
+                console.log(queue);
+                console.log(songId);
+                const index = queue.findIndex(u => Number(u.songId) === Number(songId));
+                console.log(index);
+                if (index !== -1) {
+                    queue.splice(0, index + 1);
+                }
+            });
         }
+
     }
     // Gemini
 
