@@ -1,7 +1,8 @@
 let playingAudioId = null;
 const liked_classes = {true: 'bi-hand-thumbs-up-fill', false: 'bi-hand-thumbs-up'}
 let queue = [];
-let queue_album = [];
+let queueAlbum = [];
+let isIndex = false;
 
 function getUniqueListenedStats(audio) {
     const ranges = audio.played; // Native browser TimeRanges object
@@ -119,8 +120,8 @@ function playAudio(element, stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg',
         sendRetentionPercent()
     }
     if (!queuePlay) {
-        if (queue_album.length !== 0) {
-            queue = [...queue_album];
+        if (queueAlbum.length !== 0 && !isIndex) {
+            queue = [...queueAlbum];
             const index = queue.findIndex(u => u.songId === songId);
             if (index !== -1) {
                 queue.splice(0, index + 1);
@@ -218,3 +219,7 @@ async function getAudioDuration(url) {
       }, {once: true});
   });
 }
+
+document.addEventListener("turbo:load", function () {
+    isIndex = window.location.pathname === "/"
+});

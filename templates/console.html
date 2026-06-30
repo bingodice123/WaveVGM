@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}
+{{ console_info["name"] }}
+{% endblock %}
+
+{% block body %}
+    <h1 class="text-center">{{ console_info["name"] }}</h1>
+    <div class="d-flex flex-wrap gap-2 justify-content-center">
+        {% for album in albums %}
+            {{ macros.album_card(album["game"], album["img_src"], album["release_year"], album["id"]) }}
+        {% endfor %}
+    </div>
+{% endblock %}

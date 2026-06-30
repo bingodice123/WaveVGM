@@ -147,7 +147,8 @@ def index():
     else:
         for_you = query_safe("SELECT songs.*, albums.img_src, albums.game FROM songs JOIN albums ON songs.album_id = albums.id JOIN analytics ON songs.id = analytics.song_id ORDER BY likes DESC LIMIT 10")
     top_10 = query_safe("SELECT name, game, img_src, stream_src, songs.id AS id FROM songs JOIN albums ON songs.album_id = albums.id JOIN analytics ON analytics.song_id = songs.id ORDER BY analytics.views DESC LIMIT 10")
-    return render_template('index.html', for_you=for_you, top_10=top_10)
+    consoles = query_safe("SELECT * FROM consoles ORDER BY year ASC")
+    return render_template('index.html', for_you=for_you, top_10=top_10, consoles=consoles)
 
 # Author: Me
 @app.route('/album')
@@ -199,6 +200,20 @@ def search_page():
                         """, (final_query,))
 
     return render_template('search.html', songs=songs, albums=albums, q=q)
+
+@app.route('/console')
+def console():
+    console_id = request.args.get("id")
+    if not console_id:
+        abort(400)
+    try:
+        console_info = query_safe("SELECT * FROM consoles WHERE id = ?", (console_id,))[0]
+    except IndexError:
+        abort(400)
+    except sqlite3.OperationalError:
+        abort(500)
+    albums = query_safe("SELECT * FROM albums WHERE console_id = ?", (console_id,))
+    return render_template("console.html", albums=albums, console_info=console_info)
 
 
 # API stuff

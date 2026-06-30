@@ -17,9 +17,9 @@
             });
         });
         document.addEventListener("turbo:load", function () {
-            queue_album = []
+            queueAlbum = []
             {% for song in songs %}
-                queue_album.push({stream: '{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃") }}', imgSrc: '{{ album["img_src"] }}', title: '{{ song["name"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', game: '{{ album["game"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', songId: '{{ song["id"] }}'})
+                queueAlbum.push({stream: '{{ song["stream_src"] | replace("'", "＇") | replace("#", "＃") }}', imgSrc: '{{ album["img_src"] }}', title: '{{ song["name"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', game: '{{ album["game"] | replace("'", "＇") | replace(":", "：") | replace("#", "＃") }}', songId: '{{ song["id"] }}'})
             {% endfor %}
         });
         document.addEventListener("turbo:load", function () {

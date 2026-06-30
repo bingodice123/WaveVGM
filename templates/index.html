@@ -24,6 +24,14 @@
                 pagination: false
             }).mount()
         });
+        document.addEventListener("turbo:load", function () {
+            new Splide('#console-carousel', {
+                fixedWidth: '18rem',
+                perMove: 2,
+                gap: '0.5rem',
+                pagination: false
+            }).mount()
+        });
     </script>
 
 {% endblock %}
@@ -68,5 +76,15 @@
     <h2>TODO</h2>
     <hr>
     <h1>Browse by console</h1>
-    <h2>TODO</h2>
+        <section class="splide" aria-label="Console" id="console-carousel">
+          <div class="splide__track">
+            <ul class="splide__list">
+                {% for console in consoles %}
+                <li class="splide__slide">
+                    {{ macros.console_card(console["name"], console["img_src"], console["year"], console["id"]) }}
+                </li>
+                {% endfor %}
+            </ul>
+          </div>
+        </section>
 {% endblock %}
