@@ -124,7 +124,7 @@ function playAudio(stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 
     mainThumbnailImg.src = imgSrc;
     const mediaTitle = document.getElementById('media-title');
     const mediaDesc = document.getElementById('media-desc');
-    mediaTitle.innerHTML = title.replaceAll("＇", "'").replaceAll("：", ":").replaceAll("＃", "#");
+    mediaTitle.innerHTML = title.replaceAll("＇", "'").replaceAll("：", ":").replaceAll("＃", "#").replaceAll("⧸", "/");
     mediaDesc.innerHTML = `Song &bull; ${game.replaceAll("＇", "'").replaceAll("：", ":").replaceAll("＃", "#")}`;
     // Gemini
     const audioElement = document.querySelector('media-controller [slot="media"]');
