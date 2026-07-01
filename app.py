@@ -249,8 +249,16 @@ def add_to_playlist():
     if not playlist_id:
         abort(400)
     try:
-        if current_user.is_authenticated and query_safe("SELECT user_id FROM user_playlists WHERE id = ?", (playlist_id,))[0]["user_id"] == int(current_user.get_id()):
-            query_safe("INSERT INTO playlist_songs (playlist_id, song_id) VALUES (?, ?)", (playlist_id, song_id))
+        if current_user.is_authenticated:
+            if query_safe("SELECT user_id FROM user_playlists WHERE id = ?", (playlist_id,))[0]["user_id"] == int(current_user.get_id()):
+                if len(query_safe("SELECT * FROM playlist_songs WHERE song_id = ? and playlist_id = ?", (song_id, playlist_id))) == 0:
+                    query_safe("INSERT INTO playlist_songs (playlist_id, song_id) VALUES (?, ?)", (playlist_id, song_id))
+                else:
+                    abort(409)
+            else:
+                abort(403)
+        else:
+            abort(401)
     except sqlite3.OperationalError:
         abort(500)
     except IndexError or KeyError:
