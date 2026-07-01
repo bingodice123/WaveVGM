@@ -55,8 +55,12 @@ def inject_global_functions():
             return query_safe("SELECT * FROM user_playlists WHERE user_id = ?", (current_user.get_id(),))
         except sqlite3.OperationalError:
             abort(500)
+    def get_playing_song_id():
+        return session["id"]
+    def playing_song_in_playlist(playlist_element):
+        return session["id"] in [i["song_id"] for i in query_safe("SELECT * FROM playlist_songs WHERE playlist_id = ?", (playlist_element["id"],))]
     # Return a dictionary exposing the function to Jinja
-    return dict(has_liked=has_liked, get_playlists=get_playlists)
+    return dict(has_liked=has_liked, get_playlists=get_playlists, get_playing_song_id=get_playing_song_id, playing_song_in_playlist=playing_song_in_playlist)
 
 # Author: me
 def has_emoji(text):
@@ -153,7 +157,8 @@ def index():
         for_you = query_safe("SELECT songs.*, albums.img_src, albums.game FROM songs JOIN albums ON songs.album_id = albums.id JOIN analytics ON songs.id = analytics.song_id ORDER BY likes DESC LIMIT 10")
     top_10 = query_safe("SELECT name, game, img_src, stream_src, songs.id AS id FROM songs JOIN albums ON songs.album_id = albums.id JOIN analytics ON analytics.song_id = songs.id ORDER BY analytics.views DESC LIMIT 10")
     consoles = query_safe("SELECT * FROM consoles ORDER BY year ASC")
-    return render_template('index.html', for_you=for_you, top_10=top_10, consoles=consoles)
+    playlists = query_safe("SELECT user_playlists.*, COUNT(playlist_songs.song_id) AS song_count FROM user_playlists LEFT JOIN playlist_songs ON user_playlists.id = playlist_songs.playlist_id WHERE user_playlists.user_id = ? GROUP BY user_playlists.id", (current_user.get_id(),))
+    return render_template('index.html', for_you=for_you, top_10=top_10, consoles=consoles, playlists=playlists)
 
 # Author: Me
 @app.route('/album')
@@ -226,8 +231,10 @@ def playlist():
     if not playlist_id:
         abort(400)
     try:
-        songs = query_safe("SELECT songs.* FROM playlist_songs JOIN songs ON playlist_songs.song_id = songs.id WHERE playlist_id = ?", (playlist_id,))
-        playlist_info = query_safe("SELECT * FROM user_playlists WHERE id = ?", (playlist_id,))
+        songs = query_safe("SELECT songs.*, views FROM playlist_songs JOIN songs ON playlist_songs.song_id = songs.id JOIN analytics ON songs.id = analytics.song_id WHERE playlist_id = ?", (playlist_id,))
+        playlist_info = query_safe("SELECT user_playlists.*, COUNT(playlist_songs.song_id) AS song_count FROM user_playlists LEFT JOIN playlist_songs ON user_playlists.id = playlist_songs.playlist_id WHERE user_playlists.id = ? GROUP BY user_playlists.id", (playlist_id,))[0]
+        if playlist_info["user_id"] != int(current_user.get_id()):
+            abort(403)
         albums = query_safe("SELECT albums.* FROM albums JOIN songs ON albums.id = songs.album_id JOIN playlist_songs ON playlist_songs.song_id = songs.id WHERE playlist_id = ? ORDER BY playlist_songs.rowid", (playlist_id,))
     except sqlite3.OperationalError:
         abort(500)
@@ -235,7 +242,30 @@ def playlist():
         abort(404)
     return render_template("playlist.html", songs=songs, playlist_info=playlist_info, albums=albums)
 
+@app.route('/playlist/add')
+def add_to_playlist():
+    playlist_id = request.args.get("id")
+    song_id = request.args.get("songId")
+    if not playlist_id:
+        abort(400)
+    try:
+        if current_user.is_authenticated and query_safe("SELECT user_id FROM user_playlists WHERE id = ?", (playlist_id,))[0]["user_id"] == int(current_user.get_id()):
+            query_safe("INSERT INTO playlist_songs (playlist_id, song_id) VALUES (?, ?)", (playlist_id, song_id))
+    except sqlite3.OperationalError:
+        abort(500)
+    except IndexError or KeyError:
+        abort(404)
+    return redirect(f"/playlist?id={playlist_id}", code=303)
+
 # API stuff
+
+# Author: me
+@app.route('/api/get-playlist-list', methods=["POST"])
+def get_playlist_list():
+    try:
+        return [i["playlist_id"] for i in query_safe("SELECT playlist_id FROM playlist_songs WHERE song_id = ?", (session["id"],))]
+    except sqlite3.OperationalError:
+        abort(500)
 
 # Author: me
 @app.route('/api/get-album-list', methods=["POST"])

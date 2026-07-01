@@ -1,4 +1,4 @@
-{% extends layout.html %}
+{% extends "layout.html" %}
 
 {% block title %}
 {{ playlist_info["name"] }}
@@ -64,7 +64,8 @@
                  style="--bg-image: url('{{ albums[loop.index0]["img_src"] }}'); width: 2rem; height: 2rem">
                 <img src="{{ albums[loop.index0]["img_src"] }}" alt="{{ playlist_info["name"] }}" role="presentation"
                      style="object-fit: contain">
-                    <div class="d-flex flex-column align-items-start">
+                    </div>
+                       <div class="d-flex flex-column align-items-start">
                         <p class="mb-0 fs-5 fw-bold">{{ song["name"] | replace("⧸", "/") }}</p>
                         <p class="mb-0 fs-6 fw-light">Song &bull; {{ song["views"] }} play{{ "" if song["views"] == 1 else "s" }}</p>
                     </div>

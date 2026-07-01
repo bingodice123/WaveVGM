@@ -64,12 +64,12 @@
             <div class="d-flex tight-blur-wrapper" style="height: 4.5rem; width: 4.5rem; --bg-image: url('https://i.imgur.com/x6GQBYz.jpeg')" id="blurred-thumbnail-img">
                 <img src="https://i.imgur.com/x6GQBYz.jpeg" alt="" role="presentation" style="height: 100%; width: 100%; object-fit: contain" id="main-thumbnail-img">
             </div>
-            <div class="d-flex flex-column justify-content-center">
-                <h1 id="media-title" class="text-nowrap">Unknown</h1>
-                <p id="media-desc" class="text-nowrap">Song &bull; Unknown</p>
+            <div class="d-flex flex-column justify-content-center" style="min-width: 0;">
+                <h1 id="media-title" class="text-truncate">Unknown</h1>
+                <p id="media-desc" class="text-truncate">Song &bull; Unknown</p>
             </div>
         </div>
-    </div>
+
     <div class="d-flex col-4 justify-content-center m-0 align-items-center" style="height: 5rem">
         <media-controller audio>
   <audio
@@ -98,7 +98,7 @@
               <ul class="dropdown-menu">
                   {% set found_playlists = get_playlists() %}
                   {% for playlist in found_playlists %}
-                  <li><a class="dropdown-item" href="/playlist/add?id={{ playlist["id"] }}">{{ playlist["name"] }}</a></li>
+                  <li><a class="dropdown-item add-to-playlist disable-toggle" aria-disabled="false" data-id="{{ playlist["id"] }}" href="/playlist/add?id={{ playlist["id"] }}&songId={{ get_playing_song_id() }}" data-turbo-prefetch="false">{{ playlist["name"] }}</a></li>
                   {% endfor %}
               </ul>
             </div>
@@ -108,7 +108,7 @@
         </button>
         {% endif %}
     </div>
-
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"

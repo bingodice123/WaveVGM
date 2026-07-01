@@ -113,6 +113,27 @@ async function getAlbumList(name) {
 
 }
 
+async function disable_dropdown() {
+    const disable_toggles = document.querySelectorAll('.disable-toggle');
+    const response = await fetch("/api/get-playlist-list", {
+        method: "post",
+        headers: {"Content-Type": "application/json"}
+    });
+    const song_id_list = await response.json();
+    disable_toggles.forEach((disable_toggle, index) => {
+        console.log(`Disable toggle id: ${disable_toggle.dataset.id} song id list ${song_id_list}`)
+        if (song_id_list.includes(Number(disable_toggle.dataset.id))) {
+            console.log("wow")
+            disable_toggle.classList.add("disabled");
+            disable_toggle.setAttribute("aria-disabled", "true");
+        } else {
+            disable_toggle.classList.remove("disabled");
+            disable_toggle.setAttribute("aria-disabled", "false");
+        }
+    });
+}
+
+
 // Play audio 50% Gemini
 function playAudio(element, stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg', title = 'Unknown', game = 'Unknown', songId, queuePlay) {
     // Me
@@ -166,8 +187,14 @@ function playAudio(element, stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg',
 
     // 3. Force the browser to reset and load the new asset
     audioElement.load();
+    const links = document.querySelectorAll('.add-to-playlist');
+    links.forEach((link, index) => {
+        const url = new URL(link.href);
+        url.searchParams.set('songId', songId.toString());
+        link.href = url.toString();
+    });
 
-    sendAnalytics("views", songId, 1)
+    sendAnalytics("views", songId, 1);
     playingAudioId = songId;
     const payload = {id: playingAudioId};
     const liked_payload = {id: playingAudioId};
@@ -175,6 +202,8 @@ function playAudio(element, stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg',
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(payload)
+    }).then((result) => {
+        disable_dropdown();
     }).catch(error => {
         console.error("Error", error);
     });
@@ -189,7 +218,8 @@ function playAudio(element, stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg',
     document.getElementById("like-button").classList.remove("bi-hand-thumbs-up");
     document.getElementById("like-button").classList.remove("bi-hand-thumbs-up-fill");
     document.getElementById("like-button").classList.add(liked_classes[data["liked"]])
-  })
+  });
+
     // 4. (Optional) Initiate playback programmatically
     audioElement.play().then(result => {
         audioElement.addEventListener("ended", endSong);
@@ -223,3 +253,20 @@ async function getAudioDuration(url) {
 document.addEventListener("turbo:load", function () {
     isIndex = window.location.pathname === "/"
 });
+
+
+document.addEventListener("click", function (event) {
+    const button = event.target.closest('#media-controls [data-bs-toggle="dropdown"]');
+  if (!button) return;
+
+  event.preventDefault();
+  event.stopImmediatePropagation();
+
+  if (!window.bootstrap?.Dropdown) {
+    console.error("Bootstrap Dropdown is not loaded yet");
+    return;
+  }
+  bootstrap.Dropdown.getOrCreateInstance(button).toggle();
+}, true);
+
+document.addEventListener("turbo:load", disable_dropdown);

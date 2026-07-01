@@ -32,6 +32,14 @@
                 pagination: false
             }).mount()
         });
+        document.addEventListener("turbo:load", function () {
+            new Splide('#playlists-carousel', {
+                fixedWidth: '18rem',
+                perMove: 2,
+                gap: '0.5rem',
+                pagination: false
+            }).mount()
+        });
     </script>
 
 {% endblock %}
@@ -51,7 +59,29 @@
     </section>
     <hr>
     <h1>Your playlists</h1>
-    <h2>TODO</h2>
+    <section class="splide" aria-label="Playlists" id="playlists-carousel">
+      <div class="splide__track">
+        <ul class="splide__list">
+            {% for playlist in playlists %}
+            <li class="splide__slide">
+                {{ macros.playlist_card(playlist["name"], playlist["thumbnail_img"], playlist["song_count"], playlist["id"]) }}
+            </li>
+            {% endfor %}
+            <li class="splide__slide">
+                <a href="/playlist/new" class="text-decoration-none">
+                    <div class="card flex-shrink-0" style="width: 18rem; height: 18rem">
+                        <div class="d-flex overflow-hidden position-relative" style="height: 14rem; max-height: 100%; max-width: 100%; border-top-left-radius: var(--bs-card-inner-border-radius); border-top-right-radius: var(--bs-card-inner-border-radius);">
+                            <img src="https://icons.getbootstrap.com/assets/icons/plus-circle-fill.svg" class="card-img-top position-relative" alt="" role="presentation" style="object-fit: contain;">
+                        </div>
+                        <div class="card-body" style="height: 6rem">
+                            <div class="card-title d-flex align-items-center justify-content-center" style="height: calc(6rem - 32px);"><h5 class="fit">Add Playlist</h5></div>
+                        </div>
+                    </div>
+                </a>
+            </li>
+        </ul>
+      </div>
+    </section>
     <hr>
     <h1>Top 10 songs</h1>
     <section class="splide" aria-label="Top 10" id="top-10-carousel">

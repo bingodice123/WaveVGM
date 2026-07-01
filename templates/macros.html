@@ -42,3 +42,17 @@
         </div>
     </a>
 {% endmacro %}
+
+{% macro playlist_card(name, img_src, song_count, id) %}
+    <a href="/playlist?id={{ id }}" class="text-decoration-none">
+        <div class="card flex-shrink-0" style="width: 18rem; height: 18rem">
+            <div class="d-flex tight-blur-wrapper" style="height: 14rem; --bg-image: url('{{ img_src }}')">
+                <img src="{{ img_src }}" class="card-img-top" alt="" role="presentation" style="height: 100%; width: 100%; object-fit: contain">
+            </div>
+            <div class="card-body" style="height: 6rem">
+                <div class="card-title d-flex align-items-center" style="height: calc(3rem - 16px);"><h5 class="fit">{{ name | replace("：", ":")}}</h5></div>
+                <div class="card-text d-flex align-items-center" style="height: calc(3rem - 16px);"><p class="fit">Playlist &bull; {{ song_count }} song{{ '' if song_count == 1 else 's' }}</p></div>
+            </div>
+        </div>
+    </a>
+{% endmacro %}
