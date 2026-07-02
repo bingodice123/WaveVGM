@@ -19,7 +19,7 @@ app = Flask(__name__)
 DB_EXECUTOR = ThreadPoolExecutor(max_workers=1)
 # Me
 VALID_ANALYTICS = ["views", "likes", "exits", "retention_percent"]
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'NO_KEY_GIVEN')
 #ChatGPT
 login_manager = LoginManager()
 login_manager.init_app(app)
