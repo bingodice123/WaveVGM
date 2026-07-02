@@ -57,6 +57,7 @@
         </ul>
       </div>
     </section>
+    {% if current_user.is_authenticated %}
     <hr>
     <h1>Your playlists</h1>
     <section class="splide" aria-label="Playlists" id="playlists-carousel">
@@ -82,6 +83,7 @@
         </ul>
       </div>
     </section>
+    {% endif %}
     <hr>
     <h1>Top 10 songs</h1>
     <section class="splide" aria-label="Top 10" id="top-10-carousel">
