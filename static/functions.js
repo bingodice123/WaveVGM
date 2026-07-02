@@ -288,8 +288,7 @@ function deleteSong(id, playlistId) {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({id, playlistId})
     }).then((result) => {
-        document.querySelectorAll('.delete-playlist').forEach((el) => { el.classList.toggle('d-none'); el.classList.toggle('d-flex') });
-        window.location.replace(window.location.pathname + window.location.search);
+        Turbo.visit(window.location.href, { action: "replace" });
     });
 }
 
