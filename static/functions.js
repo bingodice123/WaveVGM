@@ -4,6 +4,8 @@ let queue = [];
 let queueAlbum = [];
 let isIndex = false;
 
+
+// Gemini
 function getUniqueListenedStats(audio) {
     const ranges = audio.played; // Native browser TimeRanges object
     let totalSecondsListened = 0;
@@ -245,6 +247,8 @@ document.addEventListener("turbo:load", function () {
             fitty('.fit', {minSize: 11, maxSize: 20});
         });
 
+
+// Gemini (mostly)
 async function getAudioDuration(url) {
 
 
@@ -265,7 +269,7 @@ document.addEventListener("turbo:load", function () {
     isIndex = window.location.pathname === "/"
 });
 
-
+// ChatGPT
 document.addEventListener("click", function (event) {
     const button = event.target.closest('#media-controls [data-bs-toggle="dropdown"]');
   if (!button) return;

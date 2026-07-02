@@ -211,6 +211,7 @@ def search_page():
 
     return render_template('search.html', songs=songs, albums=albums, q=q)
 
+# Author: me
 @app.route('/console')
 def console():
     console_id = request.args.get("id")
@@ -310,6 +311,7 @@ def delete_song():
         abort(404)
     return {"Success": True}
 
+# Author: me
 @app.route('/api/delete-playlist', methods=["POST"])
 def delete_playlist():
     body = request.get_json()
