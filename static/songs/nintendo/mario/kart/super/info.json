@@ -1,0 +1,12 @@
+{
+
+    "type": "game",
+    "title": "Super Mario Kart",
+    "release": "1992",
+    "playlist": "https://www.youtube.com/playlist?list=PLkog_NvP2P1I16R7qOlDMy_NlOc3nzbVr",
+    "inherits": "none",
+    "console": "Super Nintendo Entertainment System",
+    "title_pattern": "^Super Mario Kart Music \\(SNES\\) - (.*)$"
+
+}
+

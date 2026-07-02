@@ -9,6 +9,7 @@ import traceback
 import os
 from dotenv import load_dotenv
 import emoji
+from pathlib import Path
 
 # Me
 load_dotenv("keys.env")
@@ -23,6 +24,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+lite = bool(not Path("full.txt").is_file())
 
 
 # Author: ChatGPT
@@ -68,7 +70,7 @@ def has_emoji(text):
 
 # Author: me
 def sqlite_worker(query: str, values: tuple = tuple()):
-    conn = sqlite3.connect('wavevgm.db')
+    conn = sqlite3.connect('wavevgm.db' if not lite else 'wavevgm_lite.db')
     try:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
@@ -137,7 +139,7 @@ def index():
         # me
         scores = {i["song_id"] : (i["user_retention_song_ratio"] * 0.4) + (i["user_retention_album_ratio"] * 0.25) + (i["liked"] * 0.2) + (i["global_retention_ratio"] * 0.1) + (i["views_normalized"] * 0.05) for i in joined_songs_metrics}
         query_safe("CREATE TEMP TABLE for_you_scores (id INT, score NUMERIC)")
-        conn = sqlite3.connect('wavevgm.db', check_same_thread=False)
+        conn = sqlite3.connect('wavevgm.db' if not lite else 'wavevgm_lite.db', check_same_thread=False)
         try:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
@@ -158,6 +160,7 @@ def index():
     top_10 = query_safe("SELECT name, game, img_src, stream_src, songs.id AS id FROM songs JOIN albums ON songs.album_id = albums.id JOIN analytics ON analytics.song_id = songs.id ORDER BY analytics.views DESC LIMIT 10")
     consoles = query_safe("SELECT * FROM consoles ORDER BY year ASC")
     playlists = query_safe("SELECT user_playlists.*, COUNT(playlist_songs.song_id) AS song_count FROM user_playlists LEFT JOIN playlist_songs ON user_playlists.id = playlist_songs.playlist_id WHERE user_playlists.user_id = ? GROUP BY user_playlists.id", (current_user.get_id(),))
+    print(lite)
     return render_template('index.html', for_you=for_you, top_10=top_10, consoles=consoles, playlists=playlists)
 
 # Author: Me

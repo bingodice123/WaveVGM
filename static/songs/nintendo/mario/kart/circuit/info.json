@@ -1,0 +1,12 @@
+{
+
+    "type": "game",
+    "title": "Mario Kart： Super Circuit",
+    "release": "2001",
+    "playlist": "https://www.youtube.com/playlist?list=PL27933B09777F55C7",
+    "inherits": "none",
+    "console": "Nintendo Game Boy Advance",
+    "title_pattern": "^Mario Kart Super Circuit Music - (.*)$"
+
+}
+

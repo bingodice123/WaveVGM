@@ -1,4 +1,12 @@
 .idea/
 keys.env
-static/songs/
-static/consoles/
+static/songs/*
+!static/songs/nintendo
+static/songs/nintendo/*
+!static/songs/nintendo/mario
+static/songs/nintendo/mario/*
+!static/songs/nintendo/mario/kart
+static/songs/nintendo/mario/kart/*
+!static/songs/nintendo/mario/kart/super
+!static/songs/nintendo/mario/kart/circuit
+full.txt
