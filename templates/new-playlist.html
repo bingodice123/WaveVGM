@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block title %}
+New Playlist
+{% endblock %}
+
+{% block head %}
+<script>
+    document.addEventListener("turbo:load", function () {
+        const form = document.getElementById('img-form');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+            const link = formData.get('link');
+            const blurWrapper = document.getElementById('new-playlist-thumbnail');
+            blurWrapper.style.setProperty("--bg-image", `url('${link.toString()}')`);
+            const form_data = document.getElementById("thumbnail-img-form");
+            form_data.value = link.toString();
+        });
+    });
+</script>
+{% endblock %}
+
+{% block body %}
+    <div class="d-flex mb-3 justify-content-center">
+    <h1>New Playlist</h1>
+    </div>
+    <div class="d-flex w-100">
+        <div class="d-flex w-50 justify-content-end mx-3">
+            <div class="d-block overflow-hidden" style="width: 50vh; height: 50vh">
+                <div class="tight-blur-wrapper w-100 h-100 overflow-hidden d-flex justify-content-center align-items-center rounded-3" id="new-playlist-thumbnail"
+                 style="--bg-image: url('https://i.imgur.com/x6GQBYz.jpeg');">
+                <button type="button" class="btn btn-primary z-2" data-bs-toggle="modal" data-bs-target="#select-image"><i class="bi bi-upload"></i> Choose Image</button>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" tabindex="-1" aria-labelledby="#select-image-label" id="select-image">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="select-image-label">Paste image link</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="img-form">
+                            <label for="img-form-link" class="form-label">Link to image</label>
+                            <input type="text" class="form-control" placeholder="Link" id="img-form-link" name="link" aria-describedby="img-form-link-text" autocomplete="off">
+                            <div class="form-text" id="img-form-link-text">
+                                I am a solo developer who cannot afford a server. Please upload your thumbnail image to a site such as <a href="https://imgur.com">Imgur</a> and then paste the embed link here.
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" form="img-form" class="btn btn-primary" data-bs-dismiss="modal">Upload Image</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex w-50 justify-content-start mx-3">
+            <form action="/playlist/new" method="post" id="new-playlist-form">
+                <input name="thumbnail-img" type="hidden" value="https://i.imgur.com/x6GQBYz.jpeg" id="thumbnail-img-form">
+                <label for="new-playlist-form-name" class="form-label mb-2">Name</label>
+                <input type="text" class="form-control mb-2" autocomplete="off" placeholder="Name" id="new-playlist-form-name" name="name" aria-describedby="new-playlist-form-name-text">
+                <div class="form-text mb-2" id="new-playlist-form-name-text">
+                    Choose a good name, as this is permanent and cannot be changed.
+                </div>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

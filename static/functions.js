@@ -113,22 +113,33 @@ async function getAlbumList(name) {
 
 }
 
-async function disable_dropdown() {
-    const disable_toggles = document.querySelectorAll('.disable-toggle');
+async function disableDropdown() {
+    const response1 = await fetch("/api/get-playlists", {
+        method: "post",
+        headers: {"Content-Type": "application/json"}
+    });
+    const playlistList = await response1.json();
+    const toPutPlaylists = document.getElementById("dropdown-menu-playlists");
+    toPutPlaylists.innerHTML = "";
+    playlistList.forEach((playlist, index) => {
+        toPutPlaylists.insertAdjacentHTML("beforeend", `<li><a class="dropdown-item add-to-playlist disable-toggle" aria-disabled="false" data-id="${playlist.id}" href="/playlist/add?id=${playlist.id}&songId=${playingAudioId}" data-turbo-prefetch="false">${playlist.name}</a></li>`)
+    });
+
+    const disableToggles = document.querySelectorAll('.disable-toggle');
     const response = await fetch("/api/get-playlist-list", {
         method: "post",
         headers: {"Content-Type": "application/json"}
     });
-    const song_id_list = await response.json();
-    disable_toggles.forEach((disable_toggle, index) => {
-        console.log(`Disable toggle id: ${disable_toggle.dataset.id} song id list ${song_id_list}`)
-        if (song_id_list.includes(Number(disable_toggle.dataset.id))) {
+    const songIdList = await response.json();
+    disableToggles.forEach((disableToggle, index) => {
+        console.log(`Disable toggle id: ${disableToggle.dataset.id} song id list ${songIdList}`)
+        if (songIdList.includes(Number(disableToggle.dataset.id))) {
             console.log("wow")
-            disable_toggle.classList.add("disabled");
-            disable_toggle.setAttribute("aria-disabled", "true");
+            disableToggle.classList.add("disabled");
+            disableToggle.setAttribute("aria-disabled", "true");
         } else {
-            disable_toggle.classList.remove("disabled");
-            disable_toggle.setAttribute("aria-disabled", "false");
+            disableToggle.classList.remove("disabled");
+            disableToggle.setAttribute("aria-disabled", "false");
         }
     });
 }
@@ -203,7 +214,7 @@ function playAudio(element, stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(payload)
     }).then((result) => {
-        disable_dropdown();
+        disableDropdown();
     }).catch(error => {
         console.error("Error", error);
     });
@@ -217,7 +228,7 @@ function playAudio(element, stream, imgSrc = 'https://i.imgur.com/x6GQBYz.jpeg',
   .then((data) => {
     document.getElementById("like-button").classList.remove("bi-hand-thumbs-up");
     document.getElementById("like-button").classList.remove("bi-hand-thumbs-up-fill");
-    document.getElementById("like-button").classList.add(liked_classes[data["liked"]])
+    document.getElementById("like-button").classList.add(liked_classes[data["liked"]]);
   });
 
     // 4. (Optional) Initiate playback programmatically
@@ -269,4 +280,25 @@ document.addEventListener("click", function (event) {
   bootstrap.Dropdown.getOrCreateInstance(button).toggle();
 }, true);
 
-document.addEventListener("turbo:load", disable_dropdown);
+document.addEventListener("turbo:load", disableDropdown);
+
+function deleteSong(id, playlistId) {
+    fetch('api/delete-song', {
+        method: 'POST',
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id, playlistId})
+    }).then((result) => {
+        document.querySelectorAll('.delete-playlist').forEach((el) => { el.classList.toggle('d-none'); el.classList.toggle('d-flex') });
+        window.location.replace(window.location.pathname + window.location.search);
+    });
+}
+
+function deletePlaylist(id) {
+    fetch('api/delete-playlist', {
+        method: 'POST',
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id})
+    }).then((result) => {
+        window.location.replace("/");
+    });
+}

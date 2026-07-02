@@ -56,9 +56,9 @@ def inject_global_functions():
         except sqlite3.OperationalError:
             abort(500)
     def get_playing_song_id():
-        return session["id"]
+        return session.get("id") or -1
     def playing_song_in_playlist(playlist_element):
-        return session["id"] in [i["song_id"] for i in query_safe("SELECT * FROM playlist_songs WHERE playlist_id = ?", (playlist_element["id"],))]
+        return (session.get("id") or -1) in [i["song_id"] for i in query_safe("SELECT * FROM playlist_songs WHERE playlist_id = ?", (playlist_element["id"],))]
     # Return a dictionary exposing the function to Jinja
     return dict(has_liked=has_liked, get_playlists=get_playlists, get_playing_song_id=get_playing_song_id, playing_song_in_playlist=playing_song_in_playlist)
 
@@ -74,8 +74,8 @@ def sqlite_worker(query: str, values: tuple = tuple()):
         cursor = conn.cursor()
         cursor.execute("PRAGMA foreign_keys = ON")
         cursor.execute(query, values)
-        conn.commit()
         return_values = cursor.fetchall()
+        conn.commit()
         return return_values
     finally:
         conn.close()
@@ -242,6 +242,27 @@ def playlist():
         abort(404)
     return render_template("playlist.html", songs=songs, playlist_info=playlist_info, albums=albums)
 
+@app.route('/playlist/new', methods=["GET", "POST"])
+@login_required
+def new_playlist():
+    if request.method == "POST":
+        name = request.form.get("name")
+        thumbnail_img = request.form.get("thumbnail-img")
+        if name and thumbnail_img:
+            if current_user.is_authenticated:
+                try:
+                    playlist_id = query_safe("INSERT INTO user_playlists (user_id, thumbnail_img, name) VALUES (?, ?, ?) RETURNING id", (current_user.get_id(), thumbnail_img, name))[0]["id"]
+                except sqlite3.OperationalError or IndexError or KeyError:
+                    traceback.print_exc()
+                    abort(500)
+            else:
+                abort(401)
+        else:
+            abort(400)
+        return redirect(f"/playlist?id={playlist_id}")
+    else:
+        return render_template("new-playlist.html")
+
 @app.route('/playlist/add')
 def add_to_playlist():
     playlist_id = request.args.get("id")
@@ -268,10 +289,64 @@ def add_to_playlist():
 # API stuff
 
 # Author: me
+@app.route('/api/delete-song', methods=["POST"])
+def delete_song():
+    body = request.get_json()
+    song_id = body.get("id")
+    playlist_id = body.get("playlistId")
+    if not (song_id and playlist_id):
+        abort(400)
+    try:
+        if current_user.is_authenticated:
+            if int(current_user.get_id()) == query_safe("SELECT user_id FROM user_playlists WHERE id = ?", (playlist_id,))[0]["user_id"]:
+                query_safe("DELETE FROM playlist_songs WHERE playlist_id = ? AND song_id = ?", (playlist_id, song_id))
+            else:
+                abort(403)
+        else:
+            abort(401)
+    except sqlite3.OperationalError:
+        abort(500)
+    except IndexError or KeyError:
+        abort(404)
+    return {"Success": True}
+
+@app.route('/api/delete-playlist', methods=["POST"])
+def delete_playlist():
+    body = request.get_json()
+    playlist_id = body.get("id")
+    if not playlist_id:
+        abort(400)
+    try:
+        if current_user.is_authenticated:
+            if int(current_user.get_id()) == query_safe("SELECT user_id FROM user_playlists WHERE id = ?", (playlist_id,))[0]["user_id"]:
+                query_safe("DELETE FROM playlist_songs WHERE playlist_id = ?", (playlist_id,))
+                query_safe("DELETE FROM user_playlists WHERE id = ?", (playlist_id,))
+            else:
+                abort(403)
+        else:
+            abort(401)
+    except sqlite3.OperationalError:
+        abort(500)
+    except IndexError or KeyError:
+        abort(404)
+    return {"Success": True}
+
+# Author: me
+@app.route('/api/get-playlists', methods=["POST"])
+def get_playlists():
+    try:
+        if current_user.is_authenticated:
+            return query_safe("SELECT * FROM user_playlists WHERE user_id = ?", (current_user.get_id(),))
+        else:
+            abort(401)
+    except sqlite3.OperationalError:
+        abort(500)
+
+# Author: me
 @app.route('/api/get-playlist-list', methods=["POST"])
 def get_playlist_list():
     try:
-        return [i["playlist_id"] for i in query_safe("SELECT playlist_id FROM playlist_songs WHERE song_id = ?", (session["id"],))]
+        return [i["playlist_id"] for i in query_safe("SELECT playlist_id FROM playlist_songs WHERE song_id = ?", (session.get("id") or -1,))]
     except sqlite3.OperationalError:
         abort(500)
 
