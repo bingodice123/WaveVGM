@@ -1,6 +1,6 @@
 # WaveVGM
 ## A unified library for video game music
-### Video Demo:  https://youtube.com/watch?v=
+### Video Demo:  https://youtu.be/wMsz-ZAxyps
 
 #### Introduction
 I started this final project thinking I knew what to do, as I had many projects that I had wanted to tackle in the past. However, when I decided to start looking at those projects that I wanted to do, I realized that basically all of them required building off of somebody else's work. For this project, I wanted something I could claim as fully my own work. This stumped me for a while, thinking for so long of what I should do, and then it hit me. I always struggle with finding video game music to add to my playlists on normal streaming platforms. YouTube Music is the only place where you can actually find a decent amount of songs from video games as they were played in the games. But even that was difficult, with waves of copyright strikes forcing me to re-add every single song to my playlists, which eventually became so taxing that it wasn't worth rebuilding my library anymore. So why not create one, unified library for video game music that will never be shut down, and will always put a curated, expansive, and video game-focused library first? That was where WaveVGM was born.  
