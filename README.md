@@ -18,6 +18,10 @@ Wave VGM is complete with:
 
 and is made with:
 - Python
+- HTML
+- CSS
+- JavaScript
+- JQuery
 - Flask
 - Flask-Login
 - Bootstrap
