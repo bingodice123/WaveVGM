@@ -74,7 +74,7 @@ body::-webkit-scrollbar,
 
 
 
-
+/* ChatGPT */
 .main-scroll {
   height: 100vh;
   overflow-y: auto;
@@ -83,6 +83,8 @@ body::-webkit-scrollbar,
   padding-bottom: 6rem;   /* space for media bar */
   box-sizing: border-box;
 }
+
+/* Gemini */
 /* 1. Global Controller & Theme Rules */
 media-controller {
   --media-primary-color: black;
@@ -121,6 +123,8 @@ media-time-range {
 {
   display: none;
 }
+
+/* ChatGPT */
 .btn-shadow-hover {
   /* Exactly replicates $btn-transition */
   transition: color 0.15s ease-in-out,
@@ -134,7 +138,7 @@ media-time-range {
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
 }
 
-/* Custom CSS */
+/* Gemini */
 .no-caret::after {
     display: none !important; /* Hides the caret arrow */
 }

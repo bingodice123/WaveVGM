@@ -81,3 +81,41 @@ In order to delete a playlist, just select the trash can icon on the playlist's 
 ### Lite mode
 In order to fit within GitHub's upload limits, I have uploaded a lite version of the database, which only has 2 playlists in it. In order to get the full experience, you can populate the MP3s manually yourself.  
 ![WaveVGM lite mode](static/readme/lite.png)
+
+
+## Files
+
+### ```/app.py```
+This contains the main logic for the application. This has all the database queries, the login stuff, and each route for the pages.  
+
+### ```/templates/layout.html```
+This contains the layout that all HTML files extend from. It contains the navbar, the main content area, and the media player.
+
+### ```/templates/index.html```
+This contains the home screen, with the for you, the browse by console, and the playlists and top 10 area.
+
+### ```/templates/search.html```
+This contains the search screen for the site.
+
+
+### ```/templates/album.html```
+This contains the album screen for the site.
+
+### ```/templates/macros.html```
+This contains Jinja macros for the album, playlist and song cards. I chose this design as it makes it way easier to just pop in any page with these cards, as they are the heart of my website.
+
+All other templates HTML files just do what the file name says.
+
+### ```/static/functions.js```
+This contains all JS functions, such as playing a song, sending analytics, or updating the dropdown menu on the add playlists screen to disable all playlists that have the song already on it.
+
+### ```/static/styles.css```
+This contains all the custom CSS for the project, such as the tight blur wrapper (built by gemini) or the media controls settings (fixed by gemini)
+
+### ```/wavevgm.db```
+This contains all data for the full version of WaveVGM, such as song and game titles, user data/playlists, and analytics for each song and user.
+
+### ```/wavevgm_lite.db```
+This contains all data for the lite version of WaveVGM, making sure that nonexistent songs do not populate the lite version.
+
+All files in ```/static/consoles``` or ```/static/songs``` are for the database and referenced extensively, containing thumbnails and mp3s. ```/static/readme``` contains all images in this file. all other files are not that important, such as the CC-0 license (```/LICENSE```) or the Flask requirements file (```/requirements.txt```)
